@@ -8,6 +8,7 @@ import {
   BookOpen,
   Maximize2,
   Search,
+  MoveHorizontal,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -22,13 +23,15 @@ export function QuranViewer() {
   const [zoom, setZoom] = useState(100);
   const [query, setQuery] = useState("");
   const [term, setTerm] = useState("");
+  const [fitWidth, setFitWidth] = useState(true);
   const frameWrapRef = useRef<HTMLDivElement>(null);
 
-  const src = content.quranPdfUrl
-    ? `${content.quranPdfUrl}#page=${page}&zoom=${zoom}&view=FitH${
-        term ? `&search=${encodeURIComponent(term)}` : ""
-      }`
-    : "";
+  // Uploaded PDF wins; otherwise fall back to the public static file, which
+  // works identically in development and after deployment.
+  const pdfUrl = content.quranPdfUrl || "/quran.pdf";
+  const src = `${pdfUrl}#page=${page}&zoom=${fitWidth ? "page-width" : zoom}${
+    fitWidth ? "&view=FitH" : ""
+  }${term ? `&search=${encodeURIComponent(term)}` : ""}`;
 
   const onFullscreen = () => {
     const el = frameWrapRef.current;
@@ -81,20 +84,37 @@ export function QuranViewer() {
             variant="outlineGold"
             size="sm"
             className="rounded-full"
-            onClick={() => setZoom((z) => Math.max(50, z - 25))}
+            onClick={() => {
+              setFitWidth(false);
+              setZoom((z) => Math.max(50, z - 25));
+            }}
             aria-label={t("quran.zoomOut")}
           >
             <ZoomOut />
           </Button>
-          <span className="text-sm tabular-nums text-muted-foreground">{zoom}%</span>
+          <span className="text-sm tabular-nums text-muted-foreground">
+            {fitWidth ? "Fit" : `${zoom}%`}
+          </span>
           <Button
             variant="outlineGold"
             size="sm"
             className="rounded-full"
-            onClick={() => setZoom((z) => Math.min(300, z + 25))}
+            onClick={() => {
+              setFitWidth(false);
+              setZoom((z) => Math.min(300, z + 25));
+            }}
             aria-label={t("quran.zoomIn")}
           >
             <ZoomIn />
+          </Button>
+          <Button
+            variant="outlineGold"
+            size="sm"
+            className="rounded-full"
+            onClick={() => setFitWidth(true)}
+            aria-label="Fit width"
+          >
+            <MoveHorizontal /> <span className="hidden sm:inline">Fit width</span>
           </Button>
           <Button
             variant="outlineGold"
@@ -134,27 +154,17 @@ export function QuranViewer() {
         ref={frameWrapRef}
         className="mt-5 overflow-hidden rounded-3xl border border-border bg-muted"
       >
-        {src ? (
-          <iframe
-            key={src}
-            src={src}
-            title={t("res.quran")}
-            className="h-[70vh] min-h-[420px] w-full"
-          />
-        ) : (
-          <div className="grid h-[40vh] min-h-[240px] place-items-center px-6 text-center">
-            <p className="text-sm text-muted-foreground">{t("quran.missing")}</p>
-          </div>
-        )}
+        <iframe
+          key={src}
+          src={src}
+          title={t("res.quran")}
+          className="h-[70vh] min-h-[420px] w-full"
+        />
       </div>
 
       <div className="mt-6">
-        <Button variant="gold" className="rounded-full" asChild disabled={!content.quranPdfUrl}>
-          <a
-            href={content.quranPdfUrl || "#"}
-            download={content.quranPdfName || "quran.pdf"}
-            aria-disabled={!content.quranPdfUrl}
-          >
+        <Button variant="gold" className="rounded-full" asChild>
+          <a href={pdfUrl} download={content.quranPdfName || "quran.pdf"}>
             <Download /> {t("quran.download")}
           </a>
         </Button>

@@ -464,6 +464,47 @@
 }
 
 /* Next upcoming prayer row */
+/* Read Quran call-to-action: gentle pulse + slow shimmer sweep */
+@utility btn-quran {
+  position: relative;
+  overflow: hidden;
+  animation: quran-pulse 6s ease-in-out infinite;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      110deg,
+      transparent 35%,
+      color-mix(in oklab, white 42%, transparent) 50%,
+      transparent 65%
+    );
+    background-size: 240% 100%;
+    animation: quran-sheen 6s ease-in-out infinite;
+  }
+}
+
+@keyframes quran-pulse {
+  0%,
+  100% {
+    box-shadow: 0 8px 24px -12px color-mix(in oklab, var(--color-gold) 60%, transparent);
+  }
+  50% {
+    box-shadow: 0 10px 32px -8px color-mix(in oklab, var(--color-gold) 85%, transparent);
+  }
+}
+
+@keyframes quran-sheen {
+  0% {
+    background-position: 160% 0;
+  }
+  45%,
+  100% {
+    background-position: -60% 0;
+  }
+}
+
 @utility next-prayer {
   position: relative;
   border-inline-start: 2px solid var(--color-gold);
@@ -497,6 +538,10 @@
   .icon-chip {
     animation: none;
     transition: none;
+  }
+  .btn-quran,
+  .btn-quran::after {
+    animation: none;
   }
   .text-gold-shimmer {
     animation: none;
