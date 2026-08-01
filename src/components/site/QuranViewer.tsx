@@ -1,5 +1,13 @@
-import { useState } from "react";
-import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download, BookOpen } from "lucide-react";
+import { useRef, useState } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ZoomIn,
+  ZoomOut,
+  Download,
+  BookOpen,
+  Maximize2,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useContent } from "@/lib/content";
@@ -10,10 +18,18 @@ export function QuranViewer() {
   const { t } = useI18n();
   const [page, setPage] = useState(1);
   const [zoom, setZoom] = useState(100);
+  const frameWrapRef = useRef<HTMLDivElement>(null);
 
   const src = content.quranPdfUrl
     ? `${content.quranPdfUrl}#page=${page}&zoom=${zoom}&view=FitH`
     : "";
+
+  const onFullscreen = () => {
+    const el = frameWrapRef.current;
+    if (!el) return;
+    if (document.fullscreenElement) void document.exitFullscreen();
+    else void el.requestFullscreen?.();
+  };
 
   return (
     <div className="rounded-[2.5rem] surface-card p-6 sm:p-8">
@@ -74,10 +90,22 @@ export function QuranViewer() {
           >
             <ZoomIn />
           </Button>
+          <Button
+            variant="outlineGold"
+            size="sm"
+            className="rounded-full"
+            onClick={onFullscreen}
+            aria-label={t("quran.fullscreen")}
+          >
+            <Maximize2 />
+          </Button>
         </div>
       </div>
 
-      <div className="mt-6 overflow-hidden rounded-3xl border border-border bg-muted">
+      <div
+        ref={frameWrapRef}
+        className="mt-6 overflow-hidden rounded-3xl border border-border bg-muted"
+      >
         {src ? (
           <iframe
             key={src}
