@@ -108,6 +108,28 @@ export function QuranViewer() {
         </div>
       </div>
 
+      <form
+        className="mt-5 flex flex-wrap items-center gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          setTerm(query.trim());
+        }}
+      >
+        <label htmlFor="quran-search" className="sr-only">
+          {t("quran.search")}
+        </label>
+        <Input
+          id="quran-search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={t("quran.searchPlaceholder")}
+          className="h-10 max-w-xs rounded-full"
+        />
+        <Button type="submit" variant="outlineGold" size="sm" className="rounded-full">
+          <Search /> {t("quran.search")}
+        </Button>
+      </form>
+
       <div
         ref={frameWrapRef}
         className="mt-5 overflow-hidden rounded-3xl border border-border bg-muted"
