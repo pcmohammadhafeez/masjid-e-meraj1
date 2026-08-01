@@ -23,24 +23,24 @@ export function AboutSection() {
 
   return (
     <Reveal as="article" className="h-full" delay={90}>
-      <div id="about" className="surface-card h-full scroll-mt-24 rounded-[2rem] p-7">
+      <div id="about" className="surface-card h-full scroll-mt-24 rounded-[2rem] p-6 sm:p-7">
         <div className="flex min-w-0 items-center gap-3">
           <span
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl gradient-emerald text-primary-foreground"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl gradient-emerald on-emerald"
             aria-hidden="true"
           >
             <Building2 className="h-5 w-5" />
           </span>
-          <h2 className="truncate text-sm font-semibold uppercase tracking-[0.25em] text-foreground">
+          <h2 className="truncate text-sm font-bold uppercase tracking-[0.22em] text-gold">
             {t("about.title")}
           </h2>
         </div>
         <div className="gold-rule mt-5" aria-hidden="true" />
-        <p className="mt-5 text-sm leading-relaxed text-muted-foreground">{summary}</p>
+        <p className="mt-5 text-sm leading-relaxed text-foreground/85">{summary}</p>
         <Button
           variant="gold"
           size="sm"
-          className="mt-6 rounded-full"
+          className="mt-6"
           onClick={() => setOpen(true)}
         >
           {t("about.readMore")} <ArrowRight />
@@ -52,13 +52,15 @@ export function AboutSection() {
             className="max-h-[80vh] overflow-y-auto rounded-[2rem] sm:max-w-2xl"
           >
             <DialogHeader>
-              <DialogTitle className="font-display text-2xl">{t("about.title")}</DialogTitle>
-              <DialogDescription className="font-arabic text-base text-gold">
+              <DialogTitle className="font-display text-2xl font-bold text-gold">
+                {t("about.title")}
+              </DialogTitle>
+              <DialogDescription className="font-arabic text-base text-foreground/80">
                 مسجد معراج
               </DialogDescription>
             </DialogHeader>
             <div className="gold-rule" aria-hidden="true" />
-            <div className="space-y-4 text-sm leading-relaxed text-muted-foreground">
+            <div className="space-y-4 text-sm leading-relaxed text-foreground/85">
               {full.split("\n").filter(Boolean).map((para, i) => (
                 <p key={i}>{para}</p>
               ))}
