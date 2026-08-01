@@ -104,9 +104,19 @@ export function Footer() {
         </div>
 
         <div className="gold-rule mt-14" aria-hidden="true" />
-        <p className="mt-6 text-center text-xs text-primary-foreground/65">
-          © {new Date().getFullYear()} Masjid-e-Meraj. {t("footer.rights")}
-        </p>
+        <div className="mt-6 flex items-center justify-center gap-3 text-xs text-primary-foreground/65">
+          <p>
+            © {new Date().getFullYear()} Masjid-e-Meraj. {t("footer.rights")}
+          </p>
+          {/* Discreet admin entry point */}
+          <Link
+            to="/admin"
+            aria-label={t("admin.login")}
+            className="opacity-30 transition-opacity hover:opacity-100"
+          >
+            <Lock className="h-3.5 w-3.5" />
+          </Link>
+        </div>
       </div>
     </footer>
   );
