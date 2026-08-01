@@ -14,6 +14,10 @@ import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { Reveal, SectionHeading } from "@/components/site/Reveal";
 import { QuranViewer } from "@/components/site/QuranViewer";
+import { Announcements } from "@/components/site/Announcements";
+import { AboutSection } from "@/components/site/AboutSection";
+import { ContactSection } from "@/components/site/ContactSection";
+import { LocationSection } from "@/components/site/LocationSection";
 import { useContent, type BasicTopic } from "@/lib/content";
 import { useI18n } from "@/lib/i18n";
 
@@ -149,6 +153,16 @@ function Resources() {
             </ul>
           </div>
         </section>
+
+        <section className="py-14 sm:py-20">
+          <div className="mx-auto grid max-w-7xl gap-6 px-5 sm:px-8 lg:grid-cols-3">
+            <Announcements />
+            <AboutSection />
+            <LocationSection />
+          </div>
+        </section>
+
+        <ContactSection />
       </main>
       <Footer />
     </div>
