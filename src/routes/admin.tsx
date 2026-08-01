@@ -1,6 +1,6 @@
+import { useEffect, useState, type ChangeEvent } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Lock, Plus, Save, Trash2, Upload, X, LogOut } from "lucide-react";
+import { Lock, LogOut, Save, RotateCcw, Plus, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 import { Navbar } from "@/components/site/Navbar";
@@ -10,566 +10,637 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useContent, type PrayerKey, type SiteContent } from "@/lib/content";
-import { useI18n, languages, type Lang } from "@/lib/i18n";
+import {
+  defaultContent,
+  emptyMultilingual,
+  useContent,
+  type Announcement,
+  type Multilingual,
+  type PrayerKey,
+  type SiteContent,
+} from "@/lib/content";
+import { useI18n, type Lang } from "@/lib/i18n";
 
 export const Route = createFileRoute("/admin")({
-  component: AdminPage,
+  component: Admin,
   head: () => ({
     meta: [
       { title: "Admin Panel | Masjid-e-Meraj" },
       {
         name: "description",
         content:
-          "Restricted admin panel for the Imam and masjid administration to update prayer times, announcements and resources.",
+          "Restricted administration area for the Imam and masjid committee of Masjid-e-Meraj.",
       },
-      { name: "robots", content: "noindex, nofollow" },
       { property: "og:title", content: "Admin Panel | Masjid-e-Meraj" },
-      { property: "og:description", content: "Restricted masjid administration area." },
+      {
+        property: "og:description",
+        content: "Manage prayer timings, announcements and resources for Masjid-e-Meraj.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
     ],
   }),
 });
 
-const prayerKeys: PrayerKey[] = [
-  "fajr",
-  "sunrise",
-  "dhuhr",
-  "asr",
-  "maghrib",
-  "isha",
-  "jumuah",
+const LANGS: { key: Lang; label: string }[] = [
+  { key: "en", label: "English" },
+  { key: "te", label: "తెలుగు" },
+  { key: "ur", label: "اردو" },
 ];
 
-function AdminPage() {
-  const { isAdmin } = useContent();
+const PRAYERS: PrayerKey[] = ["fajr", "sunrise", "dhuhr", "asr", "maghrib", "isha", "jumuah"];
+
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error("read failed"));
+    reader.readAsDataURL(file);
+  });
+}
+
+/** Three stacked inputs (one per language) for a multilingual value. */
+function MultilingualField({
+  label,
+  value,
+  onChange,
+  rows,
+}: {
+  label: string;
+  value: Multilingual;
+  onChange: (next: Multilingual) => void;
+  rows?: number;
+}) {
+  return (
+    <fieldset className="space-y-3">
+      <legend className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+        {label}
+      </legend>
+      {LANGS.map(({ key, label: langLabel }) => (
+        <div key={key} className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground">{langLabel}</Label>
+          {rows ? (
+            <Textarea
+              dir={key === "ur" ? "rtl" : "ltr"}
+              rows={rows}
+              value={value[key]}
+              onChange={(e) => onChange({ ...value, [key]: e.target.value })}
+              className="rounded-2xl"
+            />
+          ) : (
+            <Input
+              dir={key === "ur" ? "rtl" : "ltr"}
+              value={value[key]}
+              onChange={(e) => onChange({ ...value, [key]: e.target.value })}
+              className="rounded-full"
+            />
+          )}
+        </div>
+      ))}
+    </fieldset>
+  );
+}
+
+function Field({
+  label,
+  value,
+  onChange,
+  type = "text",
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  type?: string;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+        {label}
+      </Label>
+      <Input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="rounded-full"
+      />
+    </div>
+  );
+}
+
+function Panel({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="surface-card rounded-[2rem] p-7">
+      <h2 className="text-lg font-semibold text-foreground">{title}</h2>
+      <div className="gold-rule mt-4" aria-hidden="true" />
+      <div className="mt-6 space-y-6">{children}</div>
+    </section>
+  );
+}
+
+function Admin() {
+  const { content, saveContent, resetContent, isAdmin, login, logout } = useContent();
+  const { t } = useI18n();
+
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(false);
+  const [draft, setDraft] = useState<SiteContent>(content);
+
+  useEffect(() => {
+    setDraft(content);
+  }, [content]);
+
+  const set = <K extends keyof SiteContent>(key: K, value: SiteContent[K]) =>
+    setDraft((d) => ({ ...d, [key]: value }));
+
+  const onSubmitLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (login(username, password)) {
+      setError(false);
+      setPassword("");
+    } else {
+      setError(true);
+    }
+  };
+
+  const onUpload = async (
+    e: ChangeEvent<HTMLInputElement>,
+    apply: (dataUrl: string, file: File) => void,
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    apply(await readFileAsDataUrl(file), file);
+  };
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar transparent={false} />
+        <main className="grid place-items-center px-5 py-32 sm:px-8">
+          <form
+            onSubmit={onSubmitLogin}
+            className="glass-card w-full max-w-md rounded-[2rem] p-8"
+            aria-labelledby="admin-login-title"
+          >
+            <span
+              className="grid h-12 w-12 place-items-center rounded-2xl gradient-emerald text-primary-foreground"
+              aria-hidden="true"
+            >
+              <Lock className="h-5 w-5" />
+            </span>
+            <h1 id="admin-login-title" className="mt-5 font-display text-2xl text-foreground">
+              {t("admin.login")}
+            </h1>
+            <p className="mt-2 text-sm text-muted-foreground">{t("admin.hint")}</p>
+            <div className="mt-6 space-y-4">
+              <Field label={t("admin.username")} value={username} onChange={setUsername} />
+              <Field
+                label={t("admin.password")}
+                value={password}
+                onChange={setPassword}
+                type="password"
+              />
+            </div>
+            {error && (
+              <p role="alert" className="mt-4 text-sm font-medium text-destructive">
+                {t("admin.wrong")}
+              </p>
+            )}
+            <Button type="submit" variant="gold" className="mt-6 w-full rounded-full">
+              {t("admin.signIn")}
+            </Button>
+          </form>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar transparent={false} />
-      <main className="pt-28 pb-20">{isAdmin ? <AdminEditor /> : <LoginCard />}</main>
-      <Footer />
-    </div>
-  );
-}
-
-function LoginCard() {
-  const { login } = useContent();
-  const { t } = useI18n();
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState(false);
-
-  return (
-    <div className="mx-auto max-w-md px-5 py-16 sm:px-8">
-      <div className="rounded-[2.5rem] glass-card p-8 text-center">
-        <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl gradient-emerald text-primary-foreground">
-          <Lock className="h-6 w-6" />
-        </span>
-        <h1 className="mt-6 font-display text-3xl font-semibold text-foreground">
-          {t("admin.login")}
-        </h1>
-        <p className="mt-3 text-sm text-muted-foreground">{t("admin.hint")}</p>
-        <div className="gold-rule mt-6" aria-hidden="true" />
-        <form
-          className="mt-6 space-y-4 text-left"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (login(password)) {
-              toast.success(t("admin.login"));
-            } else {
-              setError(true);
-            }
-          }}
-        >
+      <main className="mx-auto max-w-6xl px-5 pb-20 pt-28 sm:px-8">
+        <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <Label htmlFor="admin-password">{t("admin.password")}</Label>
-            <Input
-              id="admin-password"
-              type="password"
-              value={password}
-              autoComplete="current-password"
-              onChange={(e) => {
-                setPassword(e.target.value);
-                setError(false);
-              }}
-              className="mt-2 rounded-2xl"
-            />
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gold-foreground">
+              Masjid-e-Meraj
+            </p>
+            <h1 className="mt-2 font-display text-3xl text-foreground sm:text-4xl">
+              {t("admin.title")}
+            </h1>
           </div>
-          {error && <p className="text-sm text-destructive">{t("admin.wrong")}</p>}
-          <Button type="submit" variant="gold" className="w-full rounded-full">
-            {t("admin.signIn")}
-          </Button>
-        </form>
-      </div>
-    </div>
-  );
-}
-
-function AdminEditor() {
-  const { content, saveContent, logout } = useContent();
-  const { t } = useI18n();
-  const [draft, setDraft] = useState<SiteContent>(content);
-
-  useEffect(() => setDraft(content), [content]);
-
-  const update = (patch: Partial<SiteContent>) => setDraft((d) => ({ ...d, ...patch }));
-
-  const onSave = () => {
-    saveContent(draft);
-    toast.success(t("admin.saved"));
-  };
-
-  const onPdfUpload = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const url = String(reader.result);
-      setDraft((d) => ({ ...d, quranPdfUrl: url, quranPdfName: file.name }));
-      toast.success(file.name);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  return (
-    <div className="mx-auto max-w-5xl px-5 sm:px-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-primary">
-            Masjid-e-Meraj
-          </p>
-          <h1 className="mt-2 font-display text-4xl font-semibold text-foreground">
-            {t("admin.title")}
-          </h1>
-        </div>
-        <Button variant="outlineGold" className="rounded-full" onClick={logout}>
-          <LogOut /> {t("admin.signOut")}
-        </Button>
-      </div>
-      <div className="gold-rule mt-6" aria-hidden="true" />
-
-      <Tabs defaultValue="prayer" className="mt-8">
-        <TabsList className="flex h-auto flex-wrap rounded-2xl">
-          <TabsTrigger value="prayer" className="rounded-xl">
-            {t("nav.prayerTimes")}
-          </TabsTrigger>
-          <TabsTrigger value="announcements" className="rounded-xl">
-            {t("nav.announcements")}
-          </TabsTrigger>
-          <TabsTrigger value="about" className="rounded-xl">
-            {t("nav.about")}
-          </TabsTrigger>
-          <TabsTrigger value="location" className="rounded-xl">
-            {t("loc.title")}
-          </TabsTrigger>
-          <TabsTrigger value="contact" className="rounded-xl">
-            {t("contact.title")}
-          </TabsTrigger>
-          <TabsTrigger value="resources" className="rounded-xl">
-            {t("nav.resources")}
-          </TabsTrigger>
-          <TabsTrigger value="basics" className="rounded-xl">
-            {t("res.basics")}
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="prayer" className="mt-6">
-          <Card title={t("prayer.title")}>
-            <div className="grid gap-4 sm:grid-cols-3">
-              {prayerKeys.map((key) => (
-                <div key={key}>
-                  <Label htmlFor={`t-${key}`}>{t(`prayer.${key}`)}</Label>
-                  <Input
-                    id={`t-${key}`}
-                    type="time"
-                    value={draft.prayerTimes[key]}
-                    onChange={(e) =>
-                      update({ prayerTimes: { ...draft.prayerTimes, [key]: e.target.value } })
-                    }
-                    className="mt-2 rounded-2xl"
-                  />
-                </div>
-              ))}
-              <div>
-                <Label htmlFor="t-khutbah">Jumu'ah Khutbah</Label>
-                <Input
-                  id="t-khutbah"
-                  type="time"
-                  value={draft.jumuahKhutbah}
-                  onChange={(e) => update({ jumuahKhutbah: e.target.value })}
-                  className="mt-2 rounded-2xl"
-                />
-              </div>
-            </div>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="announcements" className="mt-6">
-          <Card title={t("ann.title")}>
-            <ul className="space-y-5">
-              {draft.announcements.map((item, i) => (
-                <li key={item.id} className="rounded-3xl border border-border p-5">
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div>
-                      <Label htmlFor={`ann-title-${item.id}`}>Title</Label>
-                      <Input
-                        id={`ann-title-${item.id}`}
-                        value={item.title}
-                        onChange={(e) => {
-                          const next = [...draft.announcements];
-                          next[i] = { ...item, title: e.target.value };
-                          update({ announcements: next });
-                        }}
-                        className="mt-2 rounded-2xl"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor={`ann-date-${item.id}`}>Date / Schedule</Label>
-                      <Input
-                        id={`ann-date-${item.id}`}
-                        value={item.date}
-                        onChange={(e) => {
-                          const next = [...draft.announcements];
-                          next[i] = { ...item, date: e.target.value };
-                          update({ announcements: next });
-                        }}
-                        className="mt-2 rounded-2xl"
-                      />
-                    </div>
-                  </div>
-                  <div className="mt-4">
-                    <Label htmlFor={`ann-body-${item.id}`}>Message</Label>
-                    <Textarea
-                      id={`ann-body-${item.id}`}
-                      value={item.body}
-                      rows={3}
-                      onChange={(e) => {
-                        const next = [...draft.announcements];
-                        next[i] = { ...item, body: e.target.value };
-                        update({ announcements: next });
-                      }}
-                      className="mt-2 rounded-2xl"
-                    />
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="mt-4 rounded-full text-destructive"
-                    onClick={() =>
-                      update({ announcements: draft.announcements.filter((a) => a.id !== item.id) })
-                    }
-                  >
-                    <Trash2 /> Remove
-                  </Button>
-                </li>
-              ))}
-            </ul>
+          <div className="flex flex-wrap gap-3">
+            <Button
+              variant="gold"
+              className="rounded-full"
+              onClick={() => {
+                saveContent(draft);
+                toast.success(t("admin.saved"));
+              }}
+            >
+              <Save /> {t("admin.save")}
+            </Button>
             <Button
               variant="outlineGold"
-              className="mt-5 rounded-full"
-              onClick={() =>
-                update({
-                  announcements: [
-                    ...draft.announcements,
+              className="rounded-full"
+              onClick={() => setDraft(content)}
+            >
+              {t("admin.cancel")}
+            </Button>
+            <Button
+              variant="outline"
+              className="rounded-full"
+              onClick={() => {
+                resetContent();
+                setDraft(defaultContent);
+                toast.success(t("admin.resetDone"));
+              }}
+            >
+              <RotateCcw /> {t("admin.reset")}
+            </Button>
+            <Button variant="outline" className="rounded-full" onClick={logout}>
+              <LogOut /> {t("admin.signOut")}
+            </Button>
+          </div>
+        </div>
+
+        <Tabs defaultValue="times" className="mt-10">
+          <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 rounded-full p-1.5">
+            <TabsTrigger value="times" className="rounded-full">
+              {t("prayer.title")}
+            </TabsTrigger>
+            <TabsTrigger value="ann" className="rounded-full">
+              {t("ann.title")}
+            </TabsTrigger>
+            <TabsTrigger value="about" className="rounded-full">
+              {t("about.title")}
+            </TabsTrigger>
+            <TabsTrigger value="location" className="rounded-full">
+              {t("loc.title")}
+            </TabsTrigger>
+            <TabsTrigger value="contact" className="rounded-full">
+              {t("contact.title")}
+            </TabsTrigger>
+            <TabsTrigger value="resources" className="rounded-full">
+              {t("res.title")}
+            </TabsTrigger>
+            <TabsTrigger value="branding" className="rounded-full">
+              {t("admin.branding")}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="times" className="mt-8">
+            <Panel title={t("prayer.title")}>
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                {PRAYERS.map((key) => (
+                  <Field
+                    key={key}
+                    label={t(`prayer.${key}`)}
+                    value={draft.prayerTimes[key]}
+                    onChange={(v) =>
+                      set("prayerTimes", { ...draft.prayerTimes, [key]: v })
+                    }
+                  />
+                ))}
+                <Field
+                  label={t("prayer.khutbah")}
+                  value={draft.jumuahKhutbah}
+                  onChange={(v) => set("jumuahKhutbah", v)}
+                />
+              </div>
+            </Panel>
+          </TabsContent>
+
+          <TabsContent value="ann" className="mt-8">
+            <Panel title={t("ann.title")}>
+              <Button
+                variant="outlineGold"
+                className="rounded-full"
+                onClick={() =>
+                  set("announcements", [
                     {
                       id: `a${Date.now()}`,
-                      title: "New announcement",
-                      body: "",
-                      date: "Today",
-                    },
-                  ],
-                })
-              }
-            >
-              <Plus /> Add announcement
-            </Button>
-          </Card>
-        </TabsContent>
+                      date: "",
+                      title: { ...emptyMultilingual },
+                      body: { ...emptyMultilingual },
+                    } satisfies Announcement,
+                    ...draft.announcements,
+                  ])
+                }
+              >
+                <Plus /> {t("ann.title")}
+              </Button>
 
-        <TabsContent value="about" className="mt-6 space-y-6">
-          <Card title={t("about.title")}>
-            <Label htmlFor="about-text">About Masjid</Label>
-            <Textarea
-              id="about-text"
-              rows={5}
-              value={draft.about}
-              onChange={(e) => update({ about: e.target.value })}
-              className="mt-2 rounded-2xl"
-            />
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="location" className="mt-6 space-y-6">
-          <Card title={t("loc.title")}>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <Label htmlFor="l-name">Mosque name</Label>
-                <Input
-                  id="l-name"
-                  value={draft.location.name}
-                  onChange={(e) => update({ location: { ...draft.location, name: e.target.value } })}
-                  className="mt-2 rounded-2xl"
-                />
-              </div>
-              <div>
-                <Label htmlFor="l-maps">Google Maps URL</Label>
-                <Input
-                  id="l-maps"
-                  value={draft.location.mapsUrl}
-                  onChange={(e) =>
-                    update({ location: { ...draft.location, mapsUrl: e.target.value } })
-                  }
-                  className="mt-2 rounded-2xl"
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <Label htmlFor="l-address">{t("about.address")}</Label>
-                <Textarea
-                  id="l-address"
-                  rows={2}
-                  value={draft.location.address}
-                  onChange={(e) =>
-                    update({ location: { ...draft.location, address: e.target.value } })
-                  }
-                  className="mt-2 rounded-2xl"
-                />
-              </div>
-              <div>
-                <Label htmlFor="l-lat">Latitude</Label>
-                <Input
-                  id="l-lat"
-                  value={draft.location.latitude}
-                  onChange={(e) =>
-                    update({ location: { ...draft.location, latitude: e.target.value } })
-                  }
-                  className="mt-2 rounded-2xl"
-                />
-              </div>
-              <div>
-                <Label htmlFor="l-lng">Longitude</Label>
-                <Input
-                  id="l-lng"
-                  value={draft.location.longitude}
-                  onChange={(e) =>
-                    update({ location: { ...draft.location, longitude: e.target.value } })
-                  }
-                  className="mt-2 rounded-2xl"
-                />
-              </div>
-            </div>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="contact" className="mt-6 space-y-6">
-          <Card title={t("about.contact")}>
-            <div className="grid gap-4 sm:grid-cols-2">
-              {(
-                [
-                  ["phone", t("about.phone")],
-                  ["whatsapp", t("contact.whatsapp")],
-                  ["email", t("about.email")],
-                  ["website", t("contact.website")],
-                  ["facebook", t("contact.facebook")],
-                  ["instagram", t("contact.instagram")],
-                  ["youtube", t("contact.youtube")],
-                ] as const
-              ).map(([field, label]) => (
-                <div key={field}>
-                  <Label htmlFor={`c-${field}`}>{label}</Label>
-                  <Input
-                    id={`c-${field}`}
-                    value={draft.contact[field]}
-                    onChange={(e) =>
-                      update({ contact: { ...draft.contact, [field]: e.target.value } })
-                    }
-                    className="mt-2 rounded-2xl"
-                  />
-                </div>
-              ))}
-            </div>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="basics" className="mt-6 space-y-6">
-          <Card title={t("res.basics")}>
-            <ul className="space-y-6">
-              {draft.basics.map((topic, i) => (
-                <li key={topic.id} className="rounded-3xl border border-border p-5">
-                  <p className="text-sm font-semibold text-foreground">{topic.title.en}</p>
-                  <div className="mt-4 grid gap-4">
-                    {languages.map((l) => (
-                      <div key={l.code} className="grid gap-2">
-                        <Label htmlFor={`b-${topic.id}-${l.code}`}>Title · {l.native}</Label>
-                        <Input
-                          id={`b-${topic.id}-${l.code}`}
-                          dir={l.code === "ur" ? "rtl" : "ltr"}
-                          value={topic.title[l.code as Lang]}
-                          onChange={(e) => {
-                            const next = [...draft.basics];
-                            next[i] = {
-                              ...topic,
-                              title: { ...topic.title, [l.code]: e.target.value },
-                            };
-                            update({ basics: next });
+              <ul className="space-y-6">
+                {draft.announcements.map((item, i) => (
+                  <li key={item.id} className="rounded-3xl border border-border p-6">
+                    <div className="flex flex-wrap items-end justify-between gap-4">
+                      <div className="w-full max-w-xs">
+                        <Field
+                          label="Date / Badge"
+                          value={item.date}
+                          onChange={(v) => {
+                            const next = [...draft.announcements];
+                            next[i] = { ...item, date: v };
+                            set("announcements", next);
                           }}
-                          className="rounded-2xl"
-                        />
-                        <Label htmlFor={`bb-${topic.id}-${l.code}`}>Text · {l.native}</Label>
-                        <Textarea
-                          id={`bb-${topic.id}-${l.code}`}
-                          rows={2}
-                          dir={l.code === "ur" ? "rtl" : "ltr"}
-                          value={topic.body[l.code as Lang]}
-                          onChange={(e) => {
-                            const next = [...draft.basics];
-                            next[i] = {
-                              ...topic,
-                              body: { ...topic.body, [l.code]: e.target.value },
-                            };
-                            update({ basics: next });
-                          }}
-                          className="rounded-2xl"
                         />
                       </div>
-                    ))}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </Card>
-        </TabsContent>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-full text-destructive"
+                        onClick={() =>
+                          set(
+                            "announcements",
+                            draft.announcements.filter((a) => a.id !== item.id),
+                          )
+                        }
+                      >
+                        <Trash2 /> Delete
+                      </Button>
+                    </div>
+                    <div className="mt-5 grid gap-6 lg:grid-cols-2">
+                      <MultilingualField
+                        label="Title"
+                        value={item.title}
+                        onChange={(title) => {
+                          const next = [...draft.announcements];
+                          next[i] = { ...item, title };
+                          set("announcements", next);
+                        }}
+                      />
+                      <MultilingualField
+                        label="Body"
+                        rows={3}
+                        value={item.body}
+                        onChange={(body) => {
+                          const next = [...draft.announcements];
+                          next[i] = { ...item, body };
+                          set("announcements", next);
+                        }}
+                      />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </Panel>
+          </TabsContent>
 
-        <TabsContent value="resources" className="mt-6 space-y-6">
-          <Card title={t("res.quran")}>
-            <div className="flex flex-wrap items-center gap-4">
-              <Label
-                htmlFor="quran-pdf"
-                className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-gold px-5 py-3 text-sm font-semibold text-gold-foreground"
-              >
-                <Upload className="h-4 w-4" /> Upload Quran PDF
-              </Label>
-              <input
-                id="quran-pdf"
-                type="file"
-                accept="application/pdf"
-                className="sr-only"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) onPdfUpload(file);
-                }}
+          <TabsContent value="about" className="mt-8">
+            <Panel title={t("about.title")}>
+              <MultilingualField
+                label="Summary (home card)"
+                rows={3}
+                value={draft.aboutSummary}
+                onChange={(v) => set("aboutSummary", v)}
               />
-              <span className="text-sm text-muted-foreground">
-                {draft.quranPdfName || "No PDF selected"}
-              </span>
-            </div>
-          </Card>
+              <MultilingualField
+                label="Full description (Read More)"
+                rows={8}
+                value={draft.aboutFull}
+                onChange={(v) => set("aboutFull", v)}
+              />
+            </Panel>
+          </TabsContent>
 
-          <Card title={t("res.verse")}>
-            <div className="grid gap-4">
-              <div>
-                <Label htmlFor="v-ref">Reference</Label>
-                <Input
-                  id="v-ref"
+          <TabsContent value="location" className="mt-8">
+            <Panel title={t("loc.title")}>
+              <div className="grid gap-5 sm:grid-cols-2">
+                <Field
+                  label="Name"
+                  value={draft.location.name}
+                  onChange={(v) => set("location", { ...draft.location, name: v })}
+                />
+                <Field
+                  label="Address"
+                  value={draft.location.address}
+                  onChange={(v) => set("location", { ...draft.location, address: v })}
+                />
+                <Field
+                  label="Latitude"
+                  value={draft.location.latitude}
+                  onChange={(v) => set("location", { ...draft.location, latitude: v })}
+                />
+                <Field
+                  label="Longitude"
+                  value={draft.location.longitude}
+                  onChange={(v) => set("location", { ...draft.location, longitude: v })}
+                />
+                <Field
+                  label="Google Maps URL"
+                  value={draft.location.mapsUrl}
+                  onChange={(v) => set("location", { ...draft.location, mapsUrl: v })}
+                />
+              </div>
+            </Panel>
+          </TabsContent>
+
+          <TabsContent value="contact" className="mt-8">
+            <Panel title={t("contact.title")}>
+              <div className="grid gap-5 sm:grid-cols-2">
+                {(
+                  [
+                    ["phone", t("about.phone")],
+                    ["whatsapp", t("contact.whatsapp")],
+                    ["email", t("about.email")],
+                    ["website", t("contact.website")],
+                    ["facebook", t("contact.facebook")],
+                    ["instagram", t("contact.instagram")],
+                    ["youtube", t("contact.youtube")],
+                  ] as const
+                ).map(([key, label]) => (
+                  <Field
+                    key={key}
+                    label={label}
+                    value={draft.contact[key]}
+                    onChange={(v) => set("contact", { ...draft.contact, [key]: v })}
+                  />
+                ))}
+              </div>
+            </Panel>
+          </TabsContent>
+
+          <TabsContent value="resources" className="mt-8 space-y-6">
+            <Panel title={t("res.quran")}>
+              <div className="flex flex-wrap items-center gap-4">
+                <Button variant="outlineGold" className="rounded-full" asChild>
+                  <label className="cursor-pointer">
+                    <Upload /> Upload Quran PDF
+                    <input
+                      type="file"
+                      accept="application/pdf"
+                      className="sr-only"
+                      onChange={(e) =>
+                        void onUpload(e, (url, file) =>
+                          setDraft((d) => ({
+                            ...d,
+                            quranPdfUrl: url,
+                            quranPdfName: file.name,
+                          })),
+                        )
+                      }
+                    />
+                  </label>
+                </Button>
+                <p className="text-sm text-muted-foreground">
+                  {draft.quranPdfName || "No PDF uploaded yet"}
+                </p>
+              </div>
+            </Panel>
+
+            <Panel title={t("res.verse")}>
+              <div className="grid gap-5 sm:grid-cols-2">
+                <Field
+                  label="Reference"
                   value={draft.dailyVerse.reference}
-                  onChange={(e) =>
-                    update({ dailyVerse: { ...draft.dailyVerse, reference: e.target.value } })
-                  }
-                  className="mt-2 rounded-2xl"
+                  onChange={(v) => set("dailyVerse", { ...draft.dailyVerse, reference: v })}
                 />
-              </div>
-              <div>
-                <Label htmlFor="v-ar">Arabic</Label>
-                <Textarea
-                  id="v-ar"
-                  rows={2}
-                  dir="rtl"
+                <Field
+                  label="Arabic"
                   value={draft.dailyVerse.arabic}
-                  onChange={(e) =>
-                    update({ dailyVerse: { ...draft.dailyVerse, arabic: e.target.value } })
-                  }
-                  className="mt-2 rounded-2xl font-arabic text-xl"
+                  onChange={(v) => set("dailyVerse", { ...draft.dailyVerse, arabic: v })}
                 />
               </div>
-              {languages.map((l) => (
-                <div key={l.code}>
-                  <Label htmlFor={`v-${l.code}`}>Translation · {l.native}</Label>
-                  <Textarea
-                    id={`v-${l.code}`}
-                    rows={2}
-                    dir={l.code === "ur" ? "rtl" : "ltr"}
-                    value={draft.dailyVerse.translation[l.code as Lang]}
-                    onChange={(e) =>
-                      update({
-                        dailyVerse: {
-                          ...draft.dailyVerse,
-                          translation: {
-                            ...draft.dailyVerse.translation,
-                            [l.code]: e.target.value,
-                          },
-                        },
-                      })
-                    }
-                    className="mt-2 rounded-2xl"
-                  />
-                </div>
-              ))}
-            </div>
-          </Card>
+              <MultilingualField
+                label="Translation"
+                rows={3}
+                value={draft.dailyVerse.translation}
+                onChange={(translation) => set("dailyVerse", { ...draft.dailyVerse, translation })}
+              />
+            </Panel>
 
-          <Card title={t("res.hadith")}>
-            <div className="grid gap-4">
-              <div>
-                <Label htmlFor="h-src">Source</Label>
-                <Input
-                  id="h-src"
+            <Panel title={t("res.hadith")}>
+              <div className="grid gap-5 sm:grid-cols-2">
+                <Field
+                  label="Source"
                   value={draft.dailyHadith.source}
-                  onChange={(e) =>
-                    update({ dailyHadith: { ...draft.dailyHadith, source: e.target.value } })
-                  }
-                  className="mt-2 rounded-2xl"
+                  onChange={(v) => set("dailyHadith", { ...draft.dailyHadith, source: v })}
+                />
+                <Field
+                  label="Arabic"
+                  value={draft.dailyHadith.arabic}
+                  onChange={(v) => set("dailyHadith", { ...draft.dailyHadith, arabic: v })}
                 />
               </div>
-              {languages.map((l) => (
-                <div key={l.code}>
-                  <Label htmlFor={`h-${l.code}`}>{l.native}</Label>
-                  <Textarea
-                    id={`h-${l.code}`}
-                    rows={2}
-                    dir={l.code === "ur" ? "rtl" : "ltr"}
-                    value={draft.dailyHadith.text[l.code as Lang]}
-                    onChange={(e) =>
-                      update({
-                        dailyHadith: {
-                          ...draft.dailyHadith,
-                          text: { ...draft.dailyHadith.text, [l.code]: e.target.value },
-                        },
-                      })
-                    }
-                    className="mt-2 rounded-2xl"
-                  />
+              <MultilingualField
+                label="Text"
+                rows={3}
+                value={draft.dailyHadith.text}
+                onChange={(text) => set("dailyHadith", { ...draft.dailyHadith, text })}
+              />
+            </Panel>
+
+            <Panel title={t("res.basics")}>
+              <ul className="space-y-6">
+                {draft.basics.map((topic, i) => (
+                  <li key={topic.id} className="grid gap-6 rounded-3xl border border-border p-6 lg:grid-cols-2">
+                    <MultilingualField
+                      label="Title"
+                      value={topic.title}
+                      onChange={(title) => {
+                        const next = [...draft.basics];
+                        next[i] = { ...topic, title };
+                        set("basics", next);
+                      }}
+                    />
+                    <MultilingualField
+                      label="Body"
+                      rows={3}
+                      value={topic.body}
+                      onChange={(body) => {
+                        const next = [...draft.basics];
+                        next[i] = { ...topic, body };
+                        set("basics", next);
+                      }}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </Panel>
+          </TabsContent>
+
+          <TabsContent value="branding" className="mt-8">
+            <Panel title={t("admin.branding")}>
+              <div className="grid gap-8 sm:grid-cols-2">
+                <div className="space-y-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                    {t("admin.logo")}
+                  </p>
+                  {draft.logoUrl && (
+                    <img
+                      src={draft.logoUrl}
+                      alt="Current logo preview"
+                      className="h-20 w-20 rounded-2xl object-cover"
+                    />
+                  )}
+                  <div className="flex flex-wrap gap-3">
+                    <Button variant="outlineGold" size="sm" className="rounded-full" asChild>
+                      <label className="cursor-pointer">
+                        <Upload /> Upload
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="sr-only"
+                          onChange={(e) => void onUpload(e, (url) => set("logoUrl", url))}
+                        />
+                      </label>
+                    </Button>
+                    {draft.logoUrl && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-full"
+                        onClick={() => set("logoUrl", "")}
+                      >
+                        Remove
+                      </Button>
+                    )}
+                  </div>
                 </div>
-              ))}
-            </div>
-          </Card>
-        </TabsContent>
-      </Tabs>
 
-      <div className="sticky bottom-4 mt-8 flex flex-wrap justify-end gap-3 rounded-3xl glass-card p-4">
-        <Button variant="ghost" className="rounded-full" onClick={() => setDraft(content)}>
-          <X /> {t("admin.cancel")}
-        </Button>
-        <Button variant="gold" className="rounded-full" onClick={onSave}>
-          <Save /> {t("admin.save")}
-        </Button>
-      </div>
+                <div className="space-y-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                    {t("admin.hero")}
+                  </p>
+                  {draft.heroImageUrl && (
+                    <img
+                      src={draft.heroImageUrl}
+                      alt="Current hero background preview"
+                      className="h-28 w-full rounded-2xl object-cover"
+                    />
+                  )}
+                  <div className="flex flex-wrap gap-3">
+                    <Button variant="outlineGold" size="sm" className="rounded-full" asChild>
+                      <label className="cursor-pointer">
+                        <Upload /> Upload
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="sr-only"
+                          onChange={(e) => void onUpload(e, (url) => set("heroImageUrl", url))}
+                        />
+                      </label>
+                    </Button>
+                    {draft.heroImageUrl && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-full"
+                        onClick={() => set("heroImageUrl", "")}
+                      >
+                        Remove
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Panel>
+          </TabsContent>
+        </Tabs>
+      </main>
+      <Footer />
     </div>
-  );
-}
-
-function Card({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="rounded-[2rem] surface-card p-7">
-      <h2 className="text-lg font-semibold text-foreground">{title}</h2>
-      <div className="gold-rule mt-4 mb-6" aria-hidden="true" />
-      {children}
-    </section>
   );
 }
