@@ -33,35 +33,35 @@ export function Navbar({ transparent = true }: { transparent?: boolean }) {
     <header
       className={cn(
         "fixed inset-x-0 top-0 z-50 transition-all duration-500",
-        solid ? "glass-card rounded-none border-x-0 border-t-0 py-2" : "py-4",
+        solid ? "glass-card rounded-none border-x-0 border-t-0 py-1.5" : "py-2.5",
       )}
     >
-      <nav className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 sm:px-8 lg:grid-cols-[auto_1fr_auto]">
+      <nav className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-5 sm:px-8 lg:grid-cols-[auto_1fr_auto]">
         <Link to="/" className="flex min-w-0 items-center gap-3">
           {content.logoUrl ? (
             <img
               src={content.logoUrl}
               alt="Masjid-e-Meraj logo"
-              className="h-11 w-11 shrink-0 rounded-2xl object-cover"
+              className="h-9 w-9 shrink-0 rounded-xl object-cover"
             />
           ) : (
             <span
-              className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl gradient-emerald text-primary-foreground"
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-xl gradient-emerald text-primary-foreground"
               aria-hidden="true"
             >
-              <Moon className="h-5 w-5" />
+              <Moon className="h-4 w-4" />
             </span>
           )}
           <span className="min-w-0">
             <span
               className={cn(
-                "block truncate font-display text-lg font-semibold leading-tight transition-colors",
+                "block truncate font-display text-base font-semibold leading-tight transition-colors",
                 solid ? "text-foreground" : "text-white drop-shadow-sm",
               )}
             >
               Masjid-e-Meraj
             </span>
-            <span className="block font-arabic text-sm leading-tight text-gold">مسجد معراج</span>
+            <span className="block font-arabic text-xs leading-tight text-gold">مسجد معراج</span>
           </span>
         </Link>
 
@@ -85,7 +85,7 @@ export function Navbar({ transparent = true }: { transparent?: boolean }) {
         <div className="flex items-center justify-end gap-2">
           <LanguageSwitcher light={!solid} />
           <ThemeToggle light={!solid} />
-          <Button variant="gold" size="lg" className="hidden rounded-full lg:inline-flex" asChild>
+          <Button variant="gold" size="default" className="hidden rounded-full lg:inline-flex" asChild>
             <Link to="/" hash="prayer-times">
               {t("nav.prayerTimes")}
             </Link>
@@ -96,11 +96,11 @@ export function Navbar({ transparent = true }: { transparent?: boolean }) {
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
             className={cn(
-              "grid h-11 w-11 shrink-0 place-items-center rounded-full border border-gold/40 transition-colors lg:hidden",
+              "grid h-9 w-9 shrink-0 place-items-center rounded-full border border-gold/40 transition-colors active:scale-95 lg:hidden",
               solid ? "text-foreground" : "text-white",
             )}
           >
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </button>
         </div>
       </nav>
