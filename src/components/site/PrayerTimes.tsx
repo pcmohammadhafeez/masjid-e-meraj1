@@ -68,12 +68,31 @@ function to12h(value: string): { time: string; suffix: string } {
   return { time: `${String(h12).padStart(2, "0")}:${minutes}`, suffix };
 }
 
+/** Minutes since midnight for a stored "HH:MM" value. */
+function toMinutes(value: string): number | null {
+  const match = /^\s*(\d{1,2}):(\d{2})/.exec(value ?? "");
+  if (!match) return null;
+  return Number(match[1]) * 60 + Number(match[2]);
+}
+
 export function PrayerTimes() {
   const { content } = useContent();
   const { t, lang } = useI18n();
   const now = useNow();
 
   const locale = lang === "te" ? "te-IN" : lang === "ur" ? "ur-PK" : "en-GB";
+
+  // The next upcoming prayer (main prayers only, wraps to Fajr after Isha).
+  const mainKeys: PrayerKey[] = ["fajr", "dhuhr", "asr", "maghrib", "isha"];
+  let nextKey: PrayerKey | null = null;
+  if (now) {
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    nextKey =
+      mainKeys.find((key) => {
+        const mins = toMinutes(content.prayerTimes[key]);
+        return mins !== null && mins > nowMin;
+      }) ?? "fajr";
+  }
 
   return (
     <section
@@ -87,7 +106,7 @@ export function PrayerTimes() {
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gold/25 bg-secondary/40 px-5 py-4 sm:px-8">
               <div className="flex min-w-0 items-center gap-3">
                 <span
-                  className="grid h-9 w-9 shrink-0 place-items-center rounded-xl gradient-emerald on-emerald"
+                  className="icon-chip grid h-9 w-9 shrink-0 place-items-center rounded-xl text-gold"
                   aria-hidden="true"
                 >
                   <Clock className="h-4 w-4" />
@@ -101,31 +120,40 @@ export function PrayerTimes() {
 
             {/* Compact timetable */}
             <ul className="divide-y divide-gold/15">
-              {prayerMeta.map((prayer) => (
+              {prayerMeta.map((prayer) => {
+                const isNext = nextKey === prayer.key;
+                return (
                 <li
                   key={prayer.key}
                   className={`flex items-center gap-3 px-5 transition-colors hover:bg-secondary/60 sm:px-8 ${
                     prayer.secondary ? "bg-secondary/45 py-2" : "py-2.5"
-                  }`}
+                  } ${isNext ? "next-prayer" : ""}`}
                 >
                   <span
-                    className={`grid shrink-0 place-items-center rounded-lg ${
+                    className={`icon-chip grid shrink-0 place-items-center rounded-lg ${
                       prayer.secondary
-                        ? "h-7 w-7 bg-gold/10 text-gold/80"
-                        : "h-8 w-8 bg-gold/15 text-gold"
+                        ? "h-7 w-7 text-gold/80"
+                        : "h-8 w-8 text-gold"
                     }`}
                     aria-hidden="true"
                   >
                     <prayer.Icon className={prayer.secondary ? "h-3.5 w-3.5" : "h-4 w-4"} />
                   </span>
-                  <span
-                    className={`uppercase ${
-                      prayer.secondary
-                        ? "text-[0.7rem] font-medium tracking-[0.16em] text-muted-foreground"
-                        : "text-sm font-bold tracking-[0.14em] text-foreground"
-                    }`}
-                  >
-                    {t(`prayer.${prayer.key}`)}
+                  <span className="min-w-0">
+                    <span
+                      className={`block uppercase ${
+                        prayer.secondary
+                          ? "text-[0.7rem] font-medium tracking-[0.16em] text-muted-foreground"
+                          : "text-sm font-bold tracking-[0.14em] text-foreground"
+                      }`}
+                    >
+                      {t(`prayer.${prayer.key}`)}
+                    </span>
+                    {isNext && (
+                      <span className="mt-0.5 inline-block rounded-full border border-gold/50 bg-gold/15 px-2 py-px text-[0.55rem] font-bold uppercase tracking-[0.14em] text-gold">
+                        Next Prayer
+                      </span>
+                    )}
                   </span>
                   <span
                     className={`font-arabic ${
@@ -164,7 +192,8 @@ export function PrayerTimes() {
                     )}
                   </span>
                 </li>
-              ))}
+                );
+              })}
             </ul>
 
             {/* Date / Hijri / Clock strip */}
