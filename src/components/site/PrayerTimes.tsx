@@ -1,7 +1,19 @@
 import { useEffect, useState } from "react";
-import { Sunrise, Sun, CloudSun, Sunset, Moon, Star, Clock, CalendarDays } from "lucide-react";
+import {
+  Sunrise,
+  Sun,
+  CloudSun,
+  Sunset,
+  Moon,
+  Star,
+  Clock,
+  CalendarDays,
+  ArrowRight,
+} from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 import { Reveal } from "@/components/site/Reveal";
+import { Button } from "@/components/ui/button";
 import { useContent, type PrayerKey } from "@/lib/content";
 import { useI18n } from "@/lib/i18n";
 
@@ -142,6 +154,15 @@ export function PrayerTimes() {
                 </div>
               ))}
             </div>
+          </div>
+        </Reveal>
+        <Reveal delay={140}>
+          <div className="mt-7 flex justify-center">
+            <Button variant="gold" size="xl" asChild>
+              <Link to="/resources">
+                {t("hero.cta2")} <ArrowRight />
+              </Link>
+            </Button>
           </div>
         </Reveal>
       </div>
