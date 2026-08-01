@@ -197,7 +197,7 @@ export function PrayerTimes() {
             </ul>
 
             {/* Date / Hijri / Clock strip */}
-            <div className="grid gap-3 border-t border-gold/25 bg-secondary/60 px-5 py-4 sm:grid-cols-3 sm:gap-5 sm:px-8">
+            <div className="grid gap-3 border-t border-gold/25 bg-secondary/60 px-5 py-4 sm:grid-cols-3 sm:gap-4 sm:px-8">
               {[
                 {
                   Icon: CalendarDays,
@@ -218,18 +218,18 @@ export function PrayerTimes() {
                   value: now ? formatClock(now) : "--:--:--",
                 },
               ].map(({ Icon, label, value }) => (
-                <div key={label} className="flex min-w-0 items-center gap-3">
+                <div key={label} className="flex min-w-0 items-center gap-2.5">
                   <span
-                    className="grid h-8 w-8 shrink-0 place-items-center rounded-xl gradient-gold text-gold-foreground"
+                    className="icon-chip grid h-8 w-8 shrink-0 place-items-center rounded-xl text-gold"
                     aria-hidden="true"
                   >
                     <Icon className="h-3.5 w-3.5" />
                   </span>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="text-[0.68rem] font-medium uppercase tracking-[0.22em] text-muted-foreground">
                       {label}
                     </p>
-                    <p className="mt-0.5 truncate font-display text-base font-bold tabular-nums text-foreground sm:text-lg">
+                    <p className="mt-0.5 break-words font-display text-[0.95rem] font-bold leading-snug tabular-nums text-foreground sm:text-base">
                       {value}
                     </p>
                   </div>
