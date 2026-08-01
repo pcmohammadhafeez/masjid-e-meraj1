@@ -40,7 +40,9 @@ function useNow() {
 
 function formatClock(date: Date) {
   const pad = (n: number) => String(n).padStart(2, "0");
-  return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+  const h = date.getHours();
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${pad(h12)}:${pad(date.getMinutes())}:${pad(date.getSeconds())} ${h >= 12 ? "PM" : "AM"}`;
 }
 
 function formatHijri(date: Date) {
@@ -53,6 +55,17 @@ function formatHijri(date: Date) {
   } catch {
     return "—";
   }
+}
+
+/** Convert a stored "HH:MM" 24h value into Indian 12-hour parts. */
+function to12h(value: string): { time: string; suffix: string } {
+  const match = /^\s*(\d{1,2}):(\d{2})/.exec(value ?? "");
+  if (!match) return { time: value ?? "—", suffix: "" };
+  const hours = Number(match[1]);
+  const minutes = match[2];
+  const suffix = hours >= 12 ? "PM" : "AM";
+  const h12 = hours % 12 === 0 ? 12 : hours % 12;
+  return { time: `${String(h12).padStart(2, "0")}:${minutes}`, suffix };
 }
 
 export function PrayerTimes() {
@@ -79,7 +92,7 @@ export function PrayerTimes() {
                 >
                   <Clock className="h-4 w-4" />
                 </span>
-                <h2 className="min-w-0 truncate font-display text-xl font-bold tracking-tight text-gold sm:text-2xl">
+                <h2 className="text-gold-shimmer min-w-0 truncate font-display text-xl font-bold tracking-tight sm:text-2xl">
                   {t("prayer.title")}
                 </h2>
               </div>
@@ -92,20 +105,14 @@ export function PrayerTimes() {
                 <li
                   key={prayer.key}
                   className={`flex items-center gap-3 px-5 transition-colors hover:bg-secondary/60 sm:px-8 ${
-                    prayer.secondary
-                      ? "bg-secondary/45 py-2"
-                      : prayer.key === "jumuah"
-                        ? "bg-gold/10 py-3"
-                        : "py-2.5"
+                    prayer.secondary ? "bg-secondary/45 py-2" : "py-2.5"
                   }`}
                 >
                   <span
                     className={`grid shrink-0 place-items-center rounded-lg ${
                       prayer.secondary
                         ? "h-7 w-7 bg-gold/10 text-gold/80"
-                        : prayer.key === "jumuah"
-                          ? "h-8 w-8 gradient-gold text-gold-foreground"
-                          : "h-8 w-8 bg-gold/15 text-gold"
+                        : "h-8 w-8 bg-gold/15 text-gold"
                     }`}
                     aria-hidden="true"
                   >
@@ -130,7 +137,7 @@ export function PrayerTimes() {
                     {prayer.arabic}
                   </span>
                   <span className="mx-2 hidden h-px flex-1 bg-gold/20 sm:block" aria-hidden="true" />
-                  <span className="ms-auto min-w-[4.5rem] text-end sm:ms-0">
+                  <span className="ms-auto min-w-[5.75rem] text-end sm:ms-0">
                     <span
                       className={`block font-display tabular-nums ${
                         prayer.secondary
@@ -138,11 +145,21 @@ export function PrayerTimes() {
                           : "text-2xl font-bold tracking-tight text-mint sm:text-[1.7rem]"
                       }`}
                     >
-                      {content.prayerTimes[prayer.key]}
+                      {to12h(content.prayerTimes[prayer.key]).time}
+                      <span
+                        className={`ms-1 font-sans font-semibold tracking-wide ${
+                          prayer.secondary
+                            ? "text-[0.6rem] text-muted-foreground"
+                            : "text-[0.72rem] text-mint/85"
+                        }`}
+                      >
+                        {to12h(content.prayerTimes[prayer.key]).suffix}
+                      </span>
                     </span>
                     {prayer.key === "jumuah" && (
                       <span className="block text-[0.68rem] font-medium text-muted-foreground">
-                        Khutbah {content.jumuahKhutbah}
+                        Khutbah {to12h(content.jumuahKhutbah).time}{" "}
+                        {to12h(content.jumuahKhutbah).suffix}
                       </span>
                     )}
                   </span>
