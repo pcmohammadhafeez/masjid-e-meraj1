@@ -75,27 +75,29 @@ export function PrayerTimes() {
               <span className="font-arabic text-2xl text-gold">أوقات الصلاة</span>
             </div>
 
-            {/* Timetable */}
-            <ul className="grid grid-cols-2 divide-gold/15 sm:grid-cols-4 lg:grid-cols-7 lg:divide-x">
-              {prayerMeta.map((prayer, i) => (
+            {/* Compact timetable */}
+            <ul className="divide-y divide-gold/15">
+              {prayerMeta.map((prayer) => (
                 <li
                   key={prayer.key}
-                  className="border-b border-gold/15 px-4 py-6 text-center transition-colors hover:bg-secondary/60 lg:border-b-0"
-                  style={{ animationDelay: `${i * 60}ms` }}
+                  className="flex items-center gap-3 px-6 py-3 transition-colors hover:bg-secondary/60 sm:px-9"
                 >
-                  <p className="text-sm font-semibold uppercase tracking-[0.14em] text-foreground">
+                  <prayer.Icon className="h-4 w-4 shrink-0 text-gold" aria-hidden="true" />
+                  <span className="text-sm font-semibold uppercase tracking-[0.14em] text-foreground">
                     {t(`prayer.${prayer.key}`)}
-                  </p>
-                  <p className="mt-1 font-arabic text-lg text-gold">{prayer.arabic}</p>
-                  <prayer.Icon className="mx-auto mt-3 h-6 w-6 text-gold" aria-hidden="true" />
-                  <p className="mt-3 font-display text-3xl font-semibold tabular-nums text-primary">
-                    {content.prayerTimes[prayer.key]}
-                  </p>
-                  {prayer.key === "jumuah" && (
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Khutbah {content.jumuahKhutbah}
-                    </p>
-                  )}
+                  </span>
+                  <span className="font-arabic text-base text-gold">{prayer.arabic}</span>
+                  <span className="mx-2 hidden h-px flex-1 bg-gold/20 sm:block" aria-hidden="true" />
+                  <span className="ms-auto text-end sm:ms-0">
+                    <span className="font-display text-2xl font-semibold tabular-nums text-primary">
+                      {content.prayerTimes[prayer.key]}
+                    </span>
+                    {prayer.key === "jumuah" && (
+                      <span className="block text-[0.7rem] text-muted-foreground">
+                        Khutbah {content.jumuahKhutbah}
+                      </span>
+                    )}
+                  </span>
                 </li>
               ))}
             </ul>
