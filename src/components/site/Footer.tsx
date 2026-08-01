@@ -1,4 +1,14 @@
-import { Facebook, Instagram, Youtube, Twitter, MapPin, Phone, Mail, Moon } from "lucide-react";
+import {
+  Facebook,
+  Instagram,
+  Youtube,
+  Twitter,
+  MapPin,
+  Phone,
+  Mail,
+  Moon,
+  Lock,
+} from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
 import { useContent } from "@/lib/content";
