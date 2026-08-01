@@ -11,6 +11,10 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { ThemeProvider } from "../lib/theme";
+import { LanguageProvider } from "../lib/i18n";
+import { ContentProvider } from "../lib/content";
+import { Toaster } from "../components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -77,11 +81,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Masjid-e-Meraj" },
+      {
+        name: "description",
+        content: "Masjid-e-Meraj — a place of worship, peace, learning and community.",
+      },
+      { name: "author", content: "Masjid-e-Meraj" },
+      { property: "og:title", content: "Masjid-e-Meraj" },
+      {
+        property: "og:description",
+        content: "Prayer times, announcements and Islamic resources from Masjid-e-Meraj.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
@@ -125,8 +135,15 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <ThemeProvider>
+        <LanguageProvider>
+          <ContentProvider>
+            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+            <Outlet />
+            <Toaster />
+          </ContentProvider>
+        </LanguageProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
