@@ -21,7 +21,7 @@ export function Hero() {
         className="absolute inset-0 bg-[linear-gradient(180deg,oklch(0.24_0.05_163/0.82),oklch(0.2_0.04_163/0.6)_45%,oklch(0.18_0.03_163/0.9))]"
         aria-hidden="true"
       />
-      <div className="relative mx-auto w-full max-w-3xl px-5 py-12 text-center sm:px-8 sm:py-16">
+      <div className="relative mx-auto w-full max-w-3xl px-5 pb-12 pt-28 text-center sm:px-8 sm:pb-16 sm:pt-32">
         <Reveal>
           <h1 className="font-display text-3xl font-semibold leading-[1.15] sm:text-5xl">
             <span className="text-gold-shimmer">Masjid-e-Meraj</span>
