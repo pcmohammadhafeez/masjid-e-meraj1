@@ -6,7 +6,7 @@ import { useI18n } from "@/lib/i18n";
 
 export function Announcements() {
   const { content } = useContent();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
 
   return (
     <Reveal as="article" className="h-full">
@@ -31,12 +31,18 @@ export function Announcements() {
             {content.announcements.slice(0, 3).map((item) => (
               <li key={item.id}>
                 <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-base font-semibold text-foreground">{item.title}</h3>
-                  <span className="rounded-full bg-gold/15 px-3 py-0.5 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-gold-foreground">
-                    {item.date}
-                  </span>
+                  <h3 className="text-base font-semibold text-foreground">
+                    {item.title[lang] || item.title.en}
+                  </h3>
+                  {item.date && (
+                    <span className="rounded-full bg-gold/15 px-3 py-0.5 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-gold-foreground">
+                      {item.date}
+                    </span>
+                  )}
                 </div>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  {item.body[lang] || item.body.en}
+                </p>
               </li>
             ))}
           </ul>
