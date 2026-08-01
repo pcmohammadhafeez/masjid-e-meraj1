@@ -55,6 +55,17 @@ function formatHijri(date: Date) {
   }
 }
 
+/** Convert a stored "HH:MM" 24h value into Indian 12-hour parts. */
+function to12h(value: string): { time: string; suffix: string } {
+  const match = /^\s*(\d{1,2}):(\d{2})/.exec(value ?? "");
+  if (!match) return { time: value ?? "—", suffix: "" };
+  const hours = Number(match[1]);
+  const minutes = match[2];
+  const suffix = hours >= 12 ? "PM" : "AM";
+  const h12 = hours % 12 === 0 ? 12 : hours % 12;
+  return { time: `${String(h12).padStart(2, "0")}:${minutes}`, suffix };
+}
+
 export function PrayerTimes() {
   const { content } = useContent();
   const { t, lang } = useI18n();
