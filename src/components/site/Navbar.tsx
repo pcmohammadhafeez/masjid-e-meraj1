@@ -32,7 +32,7 @@ export function Navbar({ transparent = true }: { transparent?: boolean }) {
   return (
     <header
       className={cn(
-        "sticky fixed inset-x-0 top-0 z-50 transition-all duration-500",
+        "fixed inset-x-0 top-0 z-50 transition-all duration-500",
         solid ? "glass-card rounded-none border-x-0 border-t-0 py-2" : "py-3",
       )}
     >
