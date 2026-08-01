@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Menu, X, Moon } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Link, useRouterState } from "@tanstack/react-router";
 
 import { cn } from "@/lib/utils";
@@ -44,14 +44,7 @@ export function Navbar({ transparent = true }: { transparent?: boolean }) {
               alt="Masjid-e-Meraj logo"
               className="h-9 w-9 shrink-0 rounded-xl object-cover ring-1 ring-gold/40 sm:h-10 sm:w-10"
             />
-          ) : (
-            <span
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-xl gradient-emerald on-emerald shadow-[var(--shadow-soft)] sm:h-10 sm:w-10"
-              aria-hidden="true"
-            >
-              <Moon className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
-            </span>
-          )}
+          ) : null}
           <span className="leading-none">
             <span
               className={cn(
