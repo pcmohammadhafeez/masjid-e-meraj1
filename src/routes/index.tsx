@@ -7,6 +7,7 @@ import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { PrayerTimes } from "@/components/site/PrayerTimes";
 import { LocationSection } from "@/components/site/LocationSection";
+import { ReadQuranSection } from "@/components/site/ReadQuranSection";
 import { Reveal } from "@/components/site/Reveal";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
@@ -42,6 +43,7 @@ function Index() {
         <section className="gradient-sand pb-8 sm:pb-12">
           <div className="mx-auto max-w-3xl px-5 sm:px-8">
             <LocationSection />
+            <ReadQuranSection />
             <Reveal delay={120}>
               <div className="mt-5 flex justify-center">
                 <Button
