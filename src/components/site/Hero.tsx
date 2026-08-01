@@ -4,25 +4,31 @@ import { Link } from "@tanstack/react-router";
 import { Reveal } from "@/components/site/Reveal";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
+import { useContent } from "@/lib/content";
 import heroMosque from "@/assets/hero-mosque.jpg";
 
 export function Hero() {
   const { t } = useI18n();
+  const { content } = useContent();
 
   return (
-    <section id="home" className="relative flex min-h-screen items-center overflow-hidden">
+    <section
+      id="home"
+      className="relative flex min-h-[88vh] items-center overflow-hidden sm:min-h-screen"
+    >
       <img
-        src={heroMosque}
+        src={content.heroImageUrl || heroMosque}
         alt="Silhouette of a mosque with domes and minarets at dusk"
         width={1920}
         height={1088}
+        fetchPriority="high"
         className="absolute inset-0 h-full w-full object-cover"
       />
       <div
         className="absolute inset-0 bg-[linear-gradient(180deg,oklch(0.24_0.05_163/0.82),oklch(0.2_0.04_163/0.6)_45%,oklch(0.18_0.03_163/0.9))]"
         aria-hidden="true"
       />
-      <div className="relative mx-auto w-full max-w-4xl px-5 py-32 text-center sm:px-8">
+      <div className="relative mx-auto w-full max-w-4xl px-5 py-24 text-center sm:px-8 sm:py-32">
         <Reveal>
           <h1 className="font-display text-4xl font-semibold leading-[1.1] text-white sm:text-6xl lg:text-7xl">
             <span className="text-gold-gradient">Masjid-e-Meraj</span>
