@@ -304,7 +304,7 @@ function Admin() {
                   />
                 ))}
                 <Field
-                  label={t("prayer.khutbah")}
+                  label="Jumu'ah Khutbah"
                   value={draft.jumuahKhutbah}
                   onChange={(v) => set("jumuahKhutbah", v)}
                 />
