@@ -29,6 +29,10 @@
   --color-gold-foreground: var(--gold-foreground);
   --color-emerald-deep: var(--emerald-deep);
   --color-sand: var(--sand);
+  --color-mint: var(--mint);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-footer: var(--footer);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
