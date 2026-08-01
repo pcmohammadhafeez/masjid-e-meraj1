@@ -82,11 +82,6 @@ export function Footer() {
                   {t("nav.resources")}
                 </Link>
               </li>
-              <li>
-                <Link to="/admin" className="transition-colors hover:text-gold">
-                  {t("nav.admin")}
-                </Link>
-              </li>
             </ul>
           </div>
 
