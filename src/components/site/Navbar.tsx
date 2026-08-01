@@ -32,36 +32,38 @@ export function Navbar({ transparent = true }: { transparent?: boolean }) {
   return (
     <header
       className={cn(
-        "fixed inset-x-0 top-0 z-50 transition-all duration-500",
-        solid ? "glass-card rounded-none border-x-0 border-t-0 py-1.5" : "py-2.5",
+        "sticky fixed inset-x-0 top-0 z-50 transition-all duration-500",
+        solid ? "glass-card rounded-none border-x-0 border-t-0 py-2" : "py-3",
       )}
     >
-      <nav className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-5 sm:px-8 lg:grid-cols-[auto_1fr_auto]">
-        <Link to="/" className="flex min-w-0 items-center gap-3">
+      <nav className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-4 sm:px-8 lg:grid-cols-[auto_1fr_auto]">
+        <Link to="/" className="flex min-w-0 items-center gap-3 rounded-2xl">
           {content.logoUrl ? (
             <img
               src={content.logoUrl}
               alt="Masjid-e-Meraj logo"
-              className="h-9 w-9 shrink-0 rounded-xl object-cover"
+              className="h-10 w-10 shrink-0 rounded-xl object-cover ring-1 ring-gold/40"
             />
           ) : (
             <span
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-xl gradient-emerald text-primary-foreground"
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-xl gradient-emerald on-emerald shadow-[var(--shadow-soft)]"
               aria-hidden="true"
             >
-              <Moon className="h-4 w-4" />
+              <Moon className="h-4.5 w-4.5" />
             </span>
           )}
-          <span className="min-w-0">
+          <span className="min-w-0 leading-none">
             <span
               className={cn(
-                "block truncate font-display text-base font-semibold leading-tight transition-colors",
-                solid ? "text-foreground" : "text-white drop-shadow-sm",
+                "block truncate font-display text-[1.05rem] font-bold leading-tight tracking-tight transition-colors",
+                solid ? "text-foreground" : "text-white drop-shadow-md",
               )}
             >
               Masjid-e-Meraj
             </span>
-            <span className="block font-arabic text-xs leading-tight text-gold">مسجد معراج</span>
+            <span className="mt-0.5 block font-arabic text-xs leading-tight text-gold">
+              مسجد معراج
+            </span>
           </span>
         </Link>
 
@@ -82,10 +84,10 @@ export function Navbar({ transparent = true }: { transparent?: boolean }) {
           ))}
         </ul>
 
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center justify-end gap-2 sm:gap-2.5">
           <LanguageSwitcher light={!solid} />
           <ThemeToggle light={!solid} />
-          <Button variant="gold" size="default" className="hidden rounded-full lg:inline-flex" asChild>
+          <Button variant="gold" size="default" className="hidden lg:inline-flex" asChild>
             <Link to="/" hash="prayer-times">
               {t("nav.prayerTimes")}
             </Link>
@@ -96,24 +98,27 @@ export function Navbar({ transparent = true }: { transparent?: boolean }) {
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
             className={cn(
-              "grid h-9 w-9 shrink-0 place-items-center rounded-full border border-gold/40 transition-colors active:scale-95 lg:hidden",
+              "grid h-10 w-10 shrink-0 place-items-center rounded-full border border-gold/50 transition-all duration-300 hover:bg-gold/15 active:scale-95 lg:hidden",
               solid ? "text-foreground" : "text-white",
             )}
           >
-            {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            {open ? <X className="h-4.5 w-4.5" /> : <Menu className="h-4.5 w-4.5" />}
           </button>
         </div>
       </nav>
 
       {open && (
-        <div className="mx-4 mt-3 rounded-3xl glass-card p-4 lg:hidden">
+        <div className="animate-in fade-in slide-in-from-top-2 mx-4 mt-3 rounded-3xl glass-card p-3 duration-300 lg:hidden">
           <ul className="grid gap-1">
             {links.map((link) => (
               <li key={link.label}>
                 <Link
                   to={link.to}
                   onClick={() => setOpen(false)}
-                  className="block rounded-2xl px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+                  className={cn(
+                    "block rounded-2xl px-4 py-3.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent",
+                    pathname === link.to && "bg-accent text-primary",
+                  )}
                 >
                   {link.label}
                 </Link>
@@ -124,7 +129,7 @@ export function Navbar({ transparent = true }: { transparent?: boolean }) {
                 to="/"
                 hash="prayer-times"
                 onClick={() => setOpen(false)}
-                className="block rounded-2xl px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+                className="block rounded-2xl px-4 py-3.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent"
               >
                 {t("nav.prayerTimes")}
               </Link>
