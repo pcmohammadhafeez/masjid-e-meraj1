@@ -50,7 +50,7 @@ export function PrayerTimes() {
   const locale = lang === "te" ? "te-IN" : lang === "ur" ? "ur-PK" : "en-GB";
 
   return (
-    <section id="prayer-times" className="scroll-mt-24 gradient-sand py-16 sm:py-20">
+    <section id="prayer-times" className="scroll-mt-24 gradient-sand py-10 sm:py-14">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <Reveal>
           <div className="overflow-hidden rounded-[2.5rem] surface-card">
