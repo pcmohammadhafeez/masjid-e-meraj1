@@ -90,7 +90,7 @@ export function PrayerTimes() {
                 >
                   <Clock className="h-4 w-4" />
                 </span>
-                <h2 className="min-w-0 truncate font-display text-xl font-bold tracking-tight text-gold sm:text-2xl">
+                <h2 className="text-gold-shimmer min-w-0 truncate font-display text-xl font-bold tracking-tight sm:text-2xl">
                   {t("prayer.title")}
                 </h2>
               </div>
@@ -135,7 +135,7 @@ export function PrayerTimes() {
                     {prayer.arabic}
                   </span>
                   <span className="mx-2 hidden h-px flex-1 bg-gold/20 sm:block" aria-hidden="true" />
-                  <span className="ms-auto min-w-[4.5rem] text-end sm:ms-0">
+                  <span className="ms-auto min-w-[5.75rem] text-end sm:ms-0">
                     <span
                       className={`block font-display tabular-nums ${
                         prayer.secondary
