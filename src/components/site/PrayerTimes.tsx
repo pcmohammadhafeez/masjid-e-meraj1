@@ -67,29 +67,24 @@ export function PrayerTimes() {
   const locale = lang === "te" ? "te-IN" : lang === "ur" ? "ur-PK" : "en-GB";
 
   return (
-    <section id="prayer-times" className="scroll-mt-24 gradient-sand py-10 sm:py-14">
+    <section id="prayer-times" className="scroll-mt-20 gradient-sand pb-8 pt-5 sm:pb-12 sm:pt-8">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <Reveal>
           <div className="overflow-hidden rounded-[2.5rem] surface-card">
             {/* Header */}
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gold/25 px-6 py-5 sm:px-9">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gold/25 px-5 py-3.5 sm:px-9">
               <div className="flex min-w-0 items-center gap-3">
                 <span
-                  className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl gradient-emerald text-primary-foreground"
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-xl gradient-emerald text-primary-foreground"
                   aria-hidden="true"
                 >
-                  <Clock className="h-5 w-5" />
+                  <Clock className="h-4 w-4" />
                 </span>
-                <div className="min-w-0">
-                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gold-foreground">
-                    {t("prayer.eyebrow")}
-                  </p>
-                  <h2 className="truncate font-display text-2xl font-semibold text-foreground">
-                    {t("prayer.title")}
-                  </h2>
-                </div>
+                <h2 className="min-w-0 truncate font-display text-xl font-semibold text-foreground sm:text-2xl">
+                  {t("prayer.title")}
+                </h2>
               </div>
-              <span className="font-arabic text-2xl text-gold">أوقات الصلاة</span>
+              <span className="font-arabic text-xl text-gold sm:text-2xl">أوقات الصلاة</span>
             </div>
 
             {/* Compact timetable */}
@@ -98,7 +93,7 @@ export function PrayerTimes() {
                 <li
                   key={prayer.key}
                   className={`flex items-center gap-3 transition-colors hover:bg-secondary/60 sm:px-9 ${
-                    prayer.secondary ? "bg-secondary/40 px-6 py-2" : "px-6 py-3"
+                    prayer.secondary ? "bg-secondary/40 px-5 py-1.5" : "px-5 py-2.5"
                   }`}
                 >
                   <prayer.Icon
@@ -139,7 +134,7 @@ export function PrayerTimes() {
             </ul>
 
             {/* Date / Hijri / Clock strip */}
-            <div className="grid gap-5 border-t border-gold/25 bg-secondary/50 px-6 py-6 sm:grid-cols-3 sm:px-9">
+            <div className="grid gap-3 border-t border-gold/25 bg-secondary/50 px-5 py-4 sm:grid-cols-3 sm:gap-5 sm:px-9">
               {[
                 {
                   Icon: CalendarDays,
@@ -160,18 +155,18 @@ export function PrayerTimes() {
                   value: now ? formatClock(now) : "--:--:--",
                 },
               ].map(({ Icon, label, value }) => (
-                <div key={label} className="flex min-w-0 items-center gap-4">
+                <div key={label} className="flex min-w-0 items-center gap-3">
                   <span
-                    className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gold text-gold-foreground"
+                    className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-gold text-gold-foreground"
                     aria-hidden="true"
                   >
-                    <Icon className="h-5 w-5" />
+                    <Icon className="h-4 w-4" />
                   </span>
                   <div className="min-w-0">
                     <p className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">
                       {label}
                     </p>
-                    <p className="mt-1 font-display text-lg font-semibold tabular-nums text-foreground">
+                    <p className="mt-0.5 font-display text-base font-semibold tabular-nums text-foreground sm:text-lg">
                       {value}
                     </p>
                   </div>
@@ -181,8 +176,13 @@ export function PrayerTimes() {
           </div>
         </Reveal>
         <Reveal delay={140}>
-          <div className="mt-7 flex justify-center">
-            <Button variant="gold" size="xl" asChild>
+          <div className="mt-5 flex justify-center">
+            <Button
+              variant="gold"
+              size="lg"
+              className="rounded-full transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_-12px_oklch(0.8_0.12_85/0.65)] active:translate-y-0 active:scale-[0.98]"
+              asChild
+            >
               <Link to="/resources">
                 {t("hero.cta2")} <ArrowRight />
               </Link>
