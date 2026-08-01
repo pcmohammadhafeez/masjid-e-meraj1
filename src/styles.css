@@ -403,4 +403,7 @@
   .float-glow {
     animation: none;
   }
+  .particles::before {
+    animation: none;
+  }
 }
