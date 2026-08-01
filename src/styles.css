@@ -29,6 +29,10 @@
   --color-gold-foreground: var(--gold-foreground);
   --color-emerald-deep: var(--emerald-deep);
   --color-sand: var(--sand);
+  --color-mint: var(--mint);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-footer: var(--footer);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -91,6 +95,11 @@
   --gold-foreground: oklch(0.26 0.05 80);
   --emerald-deep: oklch(0.3 0.07 163);
   --sand: oklch(0.97 0.016 90);
+  /* On-dark ink + accents (identical in both modes: always sit on dark greens) */
+  --ink: oklch(0.975 0.008 95);
+  --ink-muted: oklch(0.855 0.014 120);
+  --mint: oklch(0.5 0.12 165);
+  --footer: oklch(0.19 0.032 163);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
   --border: oklch(0.905 0.015 92);
@@ -135,6 +144,10 @@
   --gold-foreground: oklch(0.2 0.04 80);
   --emerald-deep: oklch(0.22 0.04 163);
   --sand: oklch(0.22 0.03 163);
+  --ink: oklch(0.975 0.008 95);
+  --ink-muted: oklch(0.855 0.014 120);
+  --mint: oklch(0.84 0.12 165);
+  --footer: oklch(0.135 0.026 163);
   --destructive: oklch(0.704 0.191 22.216);
   --destructive-foreground: oklch(0.984 0.003 247.858);
   --border: oklch(1 0 0 / 12%);
@@ -169,7 +182,11 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-body);
+    font-weight: 450;
+    line-height: 1.65;
+    letter-spacing: 0.005em;
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
 
   h1,
@@ -177,7 +194,19 @@
   h3,
   h4 {
     font-family: var(--font-display);
-    letter-spacing: -0.01em;
+    font-weight: 700;
+    letter-spacing: -0.012em;
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 2px;
   }
 
   html {
@@ -190,10 +219,90 @@
 }
 
 @utility glass-card {
-  background: color-mix(in oklab, var(--color-card) 72%, transparent);
-  backdrop-filter: blur(18px) saturate(140%);
-  border: 1px solid color-mix(in oklab, var(--color-gold) 28%, transparent);
+  background: color-mix(in oklab, var(--color-card) 82%, transparent);
+  backdrop-filter: blur(22px) saturate(150%);
+  border: 1px solid color-mix(in oklab, var(--color-gold) 30%, transparent);
   box-shadow: var(--shadow-soft);
+}
+
+/* Ink helpers for content sitting on deep-green / gold surfaces */
+@utility on-emerald {
+  color: var(--color-ink);
+}
+
+@utility on-emerald-muted {
+  color: var(--color-ink-muted);
+}
+
+@utility gradient-gold {
+  background-image: var(--gradient-gold);
+}
+
+/* Premium press / ripple interaction for buttons */
+@utility press {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.3s ease,
+    filter 0.3s ease;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle at center, oklch(1 0 0 / 0.45), transparent 60%);
+    opacity: 0;
+    transform: scale(0.3);
+    transition:
+      opacity 0.5s ease,
+      transform 0.5s ease;
+    pointer-events: none;
+  }
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lift);
+  }
+  &:active {
+    transform: translateY(0) scale(0.97);
+  }
+  &:active::after {
+    opacity: 1;
+    transform: scale(1.6);
+    transition-duration: 0s;
+  }
+}
+
+/* Very subtle floating background particles */
+@utility particles {
+  position: relative;
+  isolation: isolate;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+      radial-gradient(2px 2px at 12% 22%, color-mix(in oklab, var(--color-gold) 55%, transparent), transparent 60%),
+      radial-gradient(2px 2px at 78% 14%, color-mix(in oklab, var(--color-gold) 40%, transparent), transparent 60%),
+      radial-gradient(1.5px 1.5px at 34% 76%, color-mix(in oklab, var(--color-primary) 45%, transparent), transparent 60%),
+      radial-gradient(2.5px 2.5px at 88% 62%, color-mix(in oklab, var(--color-gold) 32%, transparent), transparent 60%),
+      radial-gradient(1.5px 1.5px at 58% 42%, color-mix(in oklab, var(--color-primary) 32%, transparent), transparent 60%);
+    opacity: 0.55;
+    animation: particle-drift 22s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes particle-drift {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0.35;
+  }
+  100% {
+    transform: translate3d(0, -18px, 0);
+    opacity: 0.7;
+  }
 }
 
 @utility surface-card {
@@ -292,6 +401,9 @@
     animation: none;
   }
   .float-glow {
+    animation: none;
+  }
+  .particles::before {
     animation: none;
   }
 }
