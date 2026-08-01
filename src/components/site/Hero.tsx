@@ -22,7 +22,7 @@ export function Hero() {
         aria-hidden="true"
       />
       <div className="float-glow pointer-events-none absolute inset-0" aria-hidden="true" />
-      <div className="relative mx-auto w-full max-w-3xl px-5 pb-8 pt-20 text-center sm:px-8 sm:pb-11 sm:pt-24">
+      <div className="relative mx-auto w-full max-w-3xl px-5 pb-6 pt-16 text-center sm:px-8 sm:pb-11 sm:pt-24">
         <Reveal>
           <h1 className="animate-fade-in font-display text-[1.75rem] font-semibold leading-[1.15] sm:text-5xl">
             <span className="text-gold-shimmer">Masjid-e-Meraj</span>

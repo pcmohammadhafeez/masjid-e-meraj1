@@ -67,7 +67,7 @@ export function PrayerTimes() {
   const locale = lang === "te" ? "te-IN" : lang === "ur" ? "ur-PK" : "en-GB";
 
   return (
-    <section id="prayer-times" className="scroll-mt-20 gradient-sand pb-8 pt-5 sm:pb-12 sm:pt-8">
+    <section id="prayer-times" className="scroll-mt-20 gradient-sand pb-7 pt-4 sm:pb-12 sm:pt-8">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <Reveal>
           <div className="overflow-hidden rounded-[2.5rem] surface-card">
