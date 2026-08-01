@@ -80,19 +80,22 @@ function Resources() {
             <Reveal>
               <article className="surface-card h-full rounded-[2rem] p-8">
                 <div className="flex items-center gap-3">
-                  <span className="grid h-11 w-11 place-items-center rounded-2xl gradient-emerald text-primary-foreground">
+                  <span
+                    className="grid h-11 w-11 place-items-center rounded-2xl gradient-emerald on-emerald"
+                    aria-hidden="true"
+                  >
                     <BookOpen className="h-5 w-5" />
                   </span>
-                  <h2 className="text-xl font-semibold text-foreground">{t("res.verse")}</h2>
+                  <h2 className="text-xl font-bold text-gold">{t("res.verse")}</h2>
                 </div>
-                <p className="mt-6 font-arabic text-2xl leading-loose text-primary" dir="rtl">
+                <p className="mt-6 font-arabic text-2xl leading-loose text-mint" dir="rtl">
                   {content.dailyVerse.arabic}
                 </p>
                 <div className="gold-rule mt-6" aria-hidden="true" />
-                <p className="mt-5 text-base leading-relaxed text-muted-foreground">
+                <p className="mt-5 text-base leading-relaxed text-foreground/90">
                   {content.dailyVerse.translation[lang]}
                 </p>
-                <p className="mt-4 text-sm font-semibold text-gold-foreground">
+                <p className="mt-4 text-sm font-semibold tracking-wide text-muted-foreground">
                   {content.dailyVerse.reference}
                 </p>
               </article>
@@ -101,21 +104,24 @@ function Resources() {
             <Reveal delay={120}>
               <article className="surface-card h-full rounded-[2rem] p-8">
                 <div className="flex items-center gap-3">
-                  <span className="grid h-11 w-11 place-items-center rounded-2xl bg-gold text-gold-foreground">
+                  <span
+                    className="grid h-11 w-11 place-items-center rounded-2xl gradient-gold text-gold-foreground"
+                    aria-hidden="true"
+                  >
                     <ScrollText className="h-5 w-5" />
                   </span>
-                  <h2 className="text-xl font-semibold text-foreground">{t("res.hadith")}</h2>
+                  <h2 className="text-xl font-bold text-gold">{t("res.hadith")}</h2>
                 </div>
                 {content.dailyHadith.arabic && (
-                  <p className="mt-6 font-arabic text-2xl leading-loose text-gold-foreground" dir="rtl">
+                  <p className="mt-6 font-arabic text-2xl leading-loose text-mint" dir="rtl">
                     {content.dailyHadith.arabic}
                   </p>
                 )}
-                <p className="mt-5 text-base leading-relaxed text-foreground">
+                <p className="mt-5 text-base leading-relaxed text-foreground/90">
                   {content.dailyHadith.text[lang]}
                 </p>
                 <div className="gold-rule mt-6" aria-hidden="true" />
-                <p className="mt-4 text-sm font-semibold text-gold-foreground">
+                <p className="mt-4 text-sm font-semibold tracking-wide text-muted-foreground">
                   {content.dailyHadith.source}
                 </p>
               </article>
@@ -135,15 +141,18 @@ function Resources() {
                 const Icon = icons[item.icon] ?? Landmark;
                 return (
                   <Reveal as="li" key={item.id} delay={i * 70}>
-                    <div className="surface-card h-full rounded-3xl p-7">
-                      <span className="grid h-11 w-11 place-items-center rounded-2xl bg-secondary text-primary">
+                    <div className="surface-card h-full rounded-[2rem] p-6 sm:p-7">
+                      <span
+                        className="grid h-11 w-11 place-items-center rounded-2xl bg-gold/15 text-gold"
+                        aria-hidden="true"
+                      >
                         <Icon className="h-5 w-5" />
                       </span>
-                      <h3 className="mt-5 text-lg font-semibold text-foreground">
+                      <h3 className="mt-5 text-lg font-bold text-gold">
                         {item.title[lang]}
                       </h3>
                       <div className="gold-rule mt-4" aria-hidden="true" />
-                      <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                      <p className="mt-4 text-sm leading-relaxed text-foreground/85">
                         {item.body[lang]}
                       </p>
                     </div>
