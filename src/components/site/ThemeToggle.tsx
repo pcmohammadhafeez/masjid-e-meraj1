@@ -11,11 +11,11 @@ export function ThemeToggle({ light = false }: { light?: boolean }) {
       onClick={toggleTheme}
       aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
       className={cn(
-        "grid h-9 w-9 shrink-0 place-items-center rounded-full border border-gold/40 transition-colors hover:bg-gold/15 active:scale-95",
-        light ? "text-white" : "text-foreground",
+        "grid h-10 w-10 shrink-0 place-items-center rounded-full border border-gold/50 transition-all duration-300 hover:bg-gold/15 hover:shadow-[var(--shadow-soft)] active:scale-95",
+        light ? "text-white" : "text-gold",
       )}
     >
-      {theme === "dark" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
+      {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
     </button>
   );
 }
