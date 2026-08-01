@@ -102,7 +102,12 @@ function Resources() {
                   </span>
                   <h2 className="text-xl font-semibold text-foreground">{t("res.hadith")}</h2>
                 </div>
-                <p className="mt-6 text-base leading-relaxed text-foreground">
+                {content.dailyHadith.arabic && (
+                  <p className="mt-6 font-arabic text-2xl leading-loose text-gold-foreground" dir="rtl">
+                    {content.dailyHadith.arabic}
+                  </p>
+                )}
+                <p className="mt-5 text-base leading-relaxed text-foreground">
                   {content.dailyHadith.text[lang]}
                 </p>
                 <div className="gold-rule mt-6" aria-hidden="true" />
