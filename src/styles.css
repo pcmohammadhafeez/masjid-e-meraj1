@@ -228,16 +228,6 @@
   background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
 }
 
-@utility text-gold-shimmer {
-  background-image: linear-gradient(
-    100deg,
-    var(--color-gold) 0%,
-    oklch(0.98 0.05 92) 40%,
-    var(--color-gold) 60%,
-    oklch(0.82 0.12 85) 100%
-  );
-}
-
 @utility float-glow {
   background:
     radial-gradient(38% 28% at 22% 30%, oklch(0.85 0.1 90 / 0.16), transparent 70%),
@@ -256,7 +246,7 @@
   }
 }
 
-@utility text-gold-shimmer-base {
+@utility text-gold-shimmer {
   background-image: linear-gradient(
     100deg,
     var(--color-gold) 0%,
