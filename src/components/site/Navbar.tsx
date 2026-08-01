@@ -7,11 +7,13 @@ import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/site/LanguageSwitcher";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
 import { useI18n } from "@/lib/i18n";
+import { useContent } from "@/lib/content";
 
 export function Navbar({ transparent = true }: { transparent?: boolean }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const { t } = useI18n();
+  const { content } = useContent();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
@@ -36,12 +38,20 @@ export function Navbar({ transparent = true }: { transparent?: boolean }) {
     >
       <nav className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 sm:px-8 lg:grid-cols-[auto_1fr_auto]">
         <Link to="/" className="flex min-w-0 items-center gap-3">
-          <span
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl gradient-emerald text-primary-foreground"
-            aria-hidden="true"
-          >
-            <Moon className="h-5 w-5" />
-          </span>
+          {content.logoUrl ? (
+            <img
+              src={content.logoUrl}
+              alt="Masjid-e-Meraj logo"
+              className="h-11 w-11 shrink-0 rounded-2xl object-cover"
+            />
+          ) : (
+            <span
+              className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl gradient-emerald text-primary-foreground"
+              aria-hidden="true"
+            >
+              <Moon className="h-5 w-5" />
+            </span>
+          )}
           <span className="min-w-0">
             <span
               className={cn(

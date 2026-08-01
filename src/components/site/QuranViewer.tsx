@@ -7,9 +7,11 @@ import {
   Download,
   BookOpen,
   Maximize2,
+  Search,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useContent } from "@/lib/content";
 import { useI18n } from "@/lib/i18n";
 
@@ -18,10 +20,14 @@ export function QuranViewer() {
   const { t } = useI18n();
   const [page, setPage] = useState(1);
   const [zoom, setZoom] = useState(100);
+  const [query, setQuery] = useState("");
+  const [term, setTerm] = useState("");
   const frameWrapRef = useRef<HTMLDivElement>(null);
 
   const src = content.quranPdfUrl
-    ? `${content.quranPdfUrl}#page=${page}&zoom=${zoom}&view=FitH`
+    ? `${content.quranPdfUrl}#page=${page}&zoom=${zoom}&view=FitH${
+        term ? `&search=${encodeURIComponent(term)}` : ""
+      }`
     : "";
 
   const onFullscreen = () => {
@@ -102,9 +108,31 @@ export function QuranViewer() {
         </div>
       </div>
 
+      <form
+        className="mt-5 flex flex-wrap items-center gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          setTerm(query.trim());
+        }}
+      >
+        <label htmlFor="quran-search" className="sr-only">
+          {t("quran.search")}
+        </label>
+        <Input
+          id="quran-search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={t("quran.searchPlaceholder")}
+          className="h-10 max-w-xs rounded-full"
+        />
+        <Button type="submit" variant="outlineGold" size="sm" className="rounded-full">
+          <Search /> {t("quran.search")}
+        </Button>
+      </form>
+
       <div
         ref={frameWrapRef}
-        className="mt-6 overflow-hidden rounded-3xl border border-border bg-muted"
+        className="mt-5 overflow-hidden rounded-3xl border border-border bg-muted"
       >
         {src ? (
           <iframe
