@@ -42,7 +42,7 @@ export function QuranViewer() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <span
-            className="grid h-11 w-11 place-items-center rounded-2xl gradient-emerald text-primary-foreground"
+            className="grid h-11 w-11 place-items-center rounded-2xl gradient-emerald on-emerald"
             aria-hidden="true"
           >
             <BookOpen className="h-5 w-5" />
