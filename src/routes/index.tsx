@@ -1,12 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { ArrowRight } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
-import { Hero } from "@/components/site/Hero";
 import { PrayerTimes } from "@/components/site/PrayerTimes";
-import { Announcements } from "@/components/site/Announcements";
-import { AboutSection } from "@/components/site/AboutSection";
 import { LocationSection } from "@/components/site/LocationSection";
+import { Reveal } from "@/components/site/Reveal";
+import { Button } from "@/components/ui/button";
+import { useI18n } from "@/lib/i18n";
 export const Route = createFileRoute("/")({
   component: Index,
   head: () => ({
@@ -30,17 +33,29 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  const { t } = useI18n();
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      <Navbar transparent={false} />
       <main>
-        <Hero />
         <PrayerTimes />
-        <section className="py-10 sm:py-14">
-          <div className="mx-auto grid max-w-7xl gap-6 px-5 sm:px-8 lg:grid-cols-3">
-            <Announcements />
-            <AboutSection />
+        <section className="gradient-sand pb-8 sm:pb-12">
+          <div className="mx-auto max-w-3xl px-5 sm:px-8">
             <LocationSection />
+            <Reveal delay={120}>
+              <div className="mt-5 flex justify-center">
+                <Button
+                  variant="gold"
+                  size="lg"
+                  className="rounded-full transition-transform duration-300 hover:-translate-y-0.5 active:scale-[0.98]"
+                  asChild
+                >
+                  <Link to="/resources">
+                    {t("hero.cta2")} <ArrowRight />
+                  </Link>
+                </Button>
+              </div>
+            </Reveal>
           </div>
         </section>
       </main>

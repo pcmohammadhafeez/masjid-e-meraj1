@@ -8,12 +8,8 @@ import {
   Star,
   Clock,
   CalendarDays,
-  ArrowRight,
 } from "lucide-react";
-import { Link } from "@tanstack/react-router";
-
 import { Reveal } from "@/components/site/Reveal";
-import { Button } from "@/components/ui/button";
 import { useContent, type PrayerKey } from "@/lib/content";
 import { useI18n } from "@/lib/i18n";
 
@@ -67,8 +63,8 @@ export function PrayerTimes() {
   const locale = lang === "te" ? "te-IN" : lang === "ur" ? "ur-PK" : "en-GB";
 
   return (
-    <section id="prayer-times" className="scroll-mt-20 gradient-sand pb-7 pt-4 sm:pb-12 sm:pt-8">
-      <div className="mx-auto max-w-7xl px-5 sm:px-8">
+    <section id="prayer-times" className="scroll-mt-20 gradient-sand pb-6 pt-20 sm:pb-8 sm:pt-24">
+      <div className="mx-auto max-w-3xl px-5 sm:px-8">
         <Reveal>
           <div className="overflow-hidden rounded-[2.5rem] surface-card">
             {/* Header */}
@@ -173,20 +169,6 @@ export function PrayerTimes() {
                 </div>
               ))}
             </div>
-          </div>
-        </Reveal>
-        <Reveal delay={140}>
-          <div className="mt-5 flex justify-center">
-            <Button
-              variant="gold"
-              size="lg"
-              className="rounded-full transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_-12px_oklch(0.8_0.12_85/0.65)] active:translate-y-0 active:scale-[0.98]"
-              asChild
-            >
-              <Link to="/resources">
-                {t("hero.cta2")} <ArrowRight />
-              </Link>
-            </Button>
           </div>
         </Reveal>
       </div>
