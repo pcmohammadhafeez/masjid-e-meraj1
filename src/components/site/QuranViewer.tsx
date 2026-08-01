@@ -7,9 +7,11 @@ import {
   Download,
   BookOpen,
   Maximize2,
+  Search,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useContent } from "@/lib/content";
 import { useI18n } from "@/lib/i18n";
 
@@ -18,10 +20,14 @@ export function QuranViewer() {
   const { t } = useI18n();
   const [page, setPage] = useState(1);
   const [zoom, setZoom] = useState(100);
+  const [query, setQuery] = useState("");
+  const [term, setTerm] = useState("");
   const frameWrapRef = useRef<HTMLDivElement>(null);
 
   const src = content.quranPdfUrl
-    ? `${content.quranPdfUrl}#page=${page}&zoom=${zoom}&view=FitH`
+    ? `${content.quranPdfUrl}#page=${page}&zoom=${zoom}&view=FitH${
+        term ? `&search=${encodeURIComponent(term)}` : ""
+      }`
     : "";
 
   const onFullscreen = () => {
