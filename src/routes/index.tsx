@@ -7,8 +7,6 @@ import { PrayerTimes } from "@/components/site/PrayerTimes";
 import { Announcements } from "@/components/site/Announcements";
 import { AboutSection } from "@/components/site/AboutSection";
 import { LocationSection } from "@/components/site/LocationSection";
-import { ContactSection } from "@/components/site/ContactSection";
-
 export const Route = createFileRoute("/")({
   component: Index,
   head: () => ({
@@ -38,14 +36,13 @@ function Index() {
       <main>
         <Hero />
         <PrayerTimes />
-        <section className="py-16 sm:py-20">
+        <section className="py-10 sm:py-14">
           <div className="mx-auto grid max-w-7xl gap-6 px-5 sm:px-8 lg:grid-cols-3">
             <Announcements />
             <AboutSection />
             <LocationSection />
           </div>
         </section>
-        <ContactSection />
       </main>
       <Footer />
     </div>
