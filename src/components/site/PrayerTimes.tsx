@@ -40,7 +40,9 @@ function useNow() {
 
 function formatClock(date: Date) {
   const pad = (n: number) => String(n).padStart(2, "0");
-  return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+  const h = date.getHours();
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${pad(h12)}:${pad(date.getMinutes())}:${pad(date.getSeconds())} ${h >= 12 ? "PM" : "AM"}`;
 }
 
 function formatHijri(date: Date) {
