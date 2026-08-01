@@ -1,8 +1,4 @@
-import { ArrowRight } from "lucide-react";
-import { Link } from "@tanstack/react-router";
-
 import { Reveal } from "@/components/site/Reveal";
-import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { useContent } from "@/lib/content";
 import heroMosque from "@/assets/hero-mosque.jpg";
@@ -44,23 +40,6 @@ export function Hero() {
           <p className="mx-auto mt-8 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">
             {t("hero.subtitle")}
           </p>
-        </Reveal>
-        <Reveal delay={380}>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <Button variant="gold" size="xl" asChild>
-              <Link to="/" hash="prayer-times">
-                {t("hero.cta")} <ArrowRight />
-              </Link>
-            </Button>
-            <Button
-              variant="outlineGold"
-              size="xl"
-              className="rounded-full border-white/40 text-white hover:bg-white/10"
-              asChild
-            >
-              <Link to="/resources">{t("hero.cta2")}</Link>
-            </Button>
-          </div>
         </Reveal>
       </div>
     </section>
