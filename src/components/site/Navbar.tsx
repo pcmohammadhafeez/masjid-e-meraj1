@@ -36,32 +36,36 @@ export function Navbar({ transparent = true }: { transparent?: boolean }) {
         solid ? "glass-card rounded-none border-x-0 border-t-0 py-2" : "py-3",
       )}
     >
-      <nav className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-4 sm:px-8 lg:grid-cols-[auto_1fr_auto]">
-        <Link to="/" className="flex min-w-0 items-center gap-3 rounded-2xl">
+      <nav className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-2.5 px-3 sm:gap-4 sm:px-8 lg:grid-cols-[auto_1fr_auto]">
+        <Link to="/" className="flex min-w-0 items-center gap-2.5 rounded-2xl sm:gap-3">
           {content.logoUrl ? (
             <img
               src={content.logoUrl}
               alt="Masjid-e-Meraj logo"
-              className="h-10 w-10 shrink-0 rounded-xl object-cover ring-1 ring-gold/40"
+              className="h-9 w-9 shrink-0 rounded-xl object-cover ring-1 ring-gold/40 sm:h-10 sm:w-10"
             />
           ) : (
             <span
-              className="grid h-10 w-10 shrink-0 place-items-center rounded-xl gradient-emerald on-emerald shadow-[var(--shadow-soft)]"
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-xl gradient-emerald on-emerald shadow-[var(--shadow-soft)] sm:h-10 sm:w-10"
               aria-hidden="true"
             >
-              <Moon className="h-4.5 w-4.5" />
+              <Moon className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
             </span>
           )}
-          <span className="min-w-0 leading-none">
+          <span className="leading-none">
             <span
               className={cn(
-                "block truncate font-display text-[1.05rem] font-bold leading-tight tracking-tight transition-colors",
-                solid ? "text-foreground" : "text-white drop-shadow-md",
+                "block whitespace-nowrap font-display text-[0.94rem] font-bold leading-tight tracking-tight sm:text-[1.05rem]",
+                solid ? "text-brand-shimmer-dark" : "text-brand-shimmer",
               )}
             >
               Masjid-e-Meraj
             </span>
-            <span className="mt-0.5 block font-arabic text-xs leading-tight text-gold">
+            <span
+              className="mt-1 block h-px w-full bg-gradient-to-r from-gold via-gold/60 to-transparent"
+              aria-hidden="true"
+            />
+            <span className="mt-1 block whitespace-nowrap font-arabic text-[0.68rem] leading-tight text-gold sm:text-xs">
               مسجد معراج
             </span>
           </span>
@@ -84,7 +88,7 @@ export function Navbar({ transparent = true }: { transparent?: boolean }) {
           ))}
         </ul>
 
-        <div className="flex items-center justify-end gap-2 sm:gap-2.5">
+        <div className="flex items-center justify-end gap-1.5 sm:gap-2.5">
           <LanguageSwitcher light={!solid} />
           <ThemeToggle light={!solid} />
           <Button variant="gold" size="default" className="hidden lg:inline-flex" asChild>
