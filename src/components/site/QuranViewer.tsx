@@ -110,7 +110,7 @@ export function QuranViewer() {
 
       <div
         ref={frameWrapRef}
-        className="mt-6 overflow-hidden rounded-3xl border border-border bg-muted"
+        className="mt-5 overflow-hidden rounded-3xl border border-border bg-muted"
       >
         {src ? (
           <iframe
