@@ -17,13 +17,18 @@ import { Button } from "@/components/ui/button";
 import { useContent, type PrayerKey } from "@/lib/content";
 import { useI18n } from "@/lib/i18n";
 
-const prayerMeta: { key: PrayerKey; arabic: string; Icon: typeof Sun }[] = [
+const prayerMeta: {
+  key: PrayerKey;
+  arabic: string;
+  Icon: typeof Sun;
+  secondary?: boolean;
+}[] = [
   { key: "fajr", arabic: "الفجر", Icon: Moon },
-  { key: "sunrise", arabic: "الشروق", Icon: Sunrise },
   { key: "dhuhr", arabic: "الظهر", Icon: Sun },
   { key: "asr", arabic: "العصر", Icon: CloudSun },
   { key: "maghrib", arabic: "المغرب", Icon: Sunset },
   { key: "isha", arabic: "العشاء", Icon: Moon },
+  { key: "sunrise", arabic: "الشروق", Icon: Sunrise, secondary: true },
   { key: "jumuah", arabic: "الجمعة", Icon: Star },
 ];
 
@@ -92,16 +97,35 @@ export function PrayerTimes() {
               {prayerMeta.map((prayer) => (
                 <li
                   key={prayer.key}
-                  className="flex items-center gap-3 px-6 py-3 transition-colors hover:bg-secondary/60 sm:px-9"
+                  className={`flex items-center gap-3 transition-colors hover:bg-secondary/60 sm:px-9 ${
+                    prayer.secondary ? "bg-secondary/40 px-6 py-2" : "px-6 py-3"
+                  }`}
                 >
-                  <prayer.Icon className="h-4 w-4 shrink-0 text-gold" aria-hidden="true" />
-                  <span className="text-sm font-semibold uppercase tracking-[0.14em] text-foreground">
+                  <prayer.Icon
+                    className={`shrink-0 text-gold ${prayer.secondary ? "h-3.5 w-3.5" : "h-4 w-4"}`}
+                    aria-hidden="true"
+                  />
+                  <span
+                    className={`font-semibold uppercase tracking-[0.14em] ${
+                      prayer.secondary
+                        ? "text-xs text-muted-foreground"
+                        : "text-sm text-foreground"
+                    }`}
+                  >
                     {t(`prayer.${prayer.key}`)}
                   </span>
-                  <span className="font-arabic text-base text-gold">{prayer.arabic}</span>
+                  <span
+                    className={`font-arabic text-gold ${prayer.secondary ? "text-sm opacity-80" : "text-base"}`}
+                  >
+                    {prayer.arabic}
+                  </span>
                   <span className="mx-2 hidden h-px flex-1 bg-gold/20 sm:block" aria-hidden="true" />
                   <span className="ms-auto text-end sm:ms-0">
-                    <span className="font-display text-2xl font-semibold tabular-nums text-primary">
+                    <span
+                      className={`font-display font-semibold tabular-nums ${
+                        prayer.secondary ? "text-lg text-muted-foreground" : "text-2xl text-primary"
+                      }`}
+                    >
                       {content.prayerTimes[prayer.key]}
                     </span>
                     {prayer.key === "jumuah" && (

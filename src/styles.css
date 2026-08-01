@@ -228,6 +228,30 @@
   background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
 }
 
+@utility text-gold-shimmer {
+  background-image: linear-gradient(
+    100deg,
+    var(--color-gold) 0%,
+    oklch(0.98 0.05 92) 40%,
+    var(--color-gold) 60%,
+    oklch(0.82 0.12 85) 100%
+  );
+  background-size: 220% 100%;
+  background-clip: text;
+  color: transparent;
+  animation: gold-shimmer 5s linear infinite;
+  filter: drop-shadow(0 0 18px oklch(0.8 0.12 85 / 0.35));
+}
+
+@keyframes gold-shimmer {
+  0% {
+    background-position: 220% 0;
+  }
+  100% {
+    background-position: -20% 0;
+  }
+}
+
 @utility reveal {
   opacity: 0;
   transform: translateY(28px);
@@ -245,5 +269,8 @@
     opacity: 1;
     transform: none;
     transition: none;
+  }
+  .text-gold-shimmer {
+    animation: none;
   }
 }
