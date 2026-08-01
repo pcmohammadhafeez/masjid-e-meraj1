@@ -157,8 +157,17 @@ function AdminEditor() {
           <TabsTrigger value="about" className="rounded-xl">
             {t("nav.about")}
           </TabsTrigger>
+          <TabsTrigger value="location" className="rounded-xl">
+            {t("loc.title")}
+          </TabsTrigger>
+          <TabsTrigger value="contact" className="rounded-xl">
+            {t("contact.title")}
+          </TabsTrigger>
           <TabsTrigger value="resources" className="rounded-xl">
             {t("nav.resources")}
+          </TabsTrigger>
+          <TabsTrigger value="basics" className="rounded-xl">
+            {t("res.basics")}
           </TabsTrigger>
         </TabsList>
 
@@ -286,48 +295,145 @@ function AdminEditor() {
               className="mt-2 rounded-2xl"
             />
           </Card>
-          <Card title={t("about.contact")}>
+        </TabsContent>
+
+        <TabsContent value="location" className="mt-6 space-y-6">
+          <Card title={t("loc.title")}>
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="sm:col-span-2">
-                <Label htmlFor="c-address">{t("about.address")}</Label>
+              <div>
+                <Label htmlFor="l-name">Mosque name</Label>
                 <Input
-                  id="c-address"
-                  value={draft.contact.address}
+                  id="l-name"
+                  value={draft.location.name}
+                  onChange={(e) => update({ location: { ...draft.location, name: e.target.value } })}
+                  className="mt-2 rounded-2xl"
+                />
+              </div>
+              <div>
+                <Label htmlFor="l-maps">Google Maps URL</Label>
+                <Input
+                  id="l-maps"
+                  value={draft.location.mapsUrl}
                   onChange={(e) =>
-                    update({ contact: { ...draft.contact, address: e.target.value } })
+                    update({ location: { ...draft.location, mapsUrl: e.target.value } })
+                  }
+                  className="mt-2 rounded-2xl"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <Label htmlFor="l-address">{t("about.address")}</Label>
+                <Textarea
+                  id="l-address"
+                  rows={2}
+                  value={draft.location.address}
+                  onChange={(e) =>
+                    update({ location: { ...draft.location, address: e.target.value } })
                   }
                   className="mt-2 rounded-2xl"
                 />
               </div>
               <div>
-                <Label htmlFor="c-phone">{t("about.phone")}</Label>
+                <Label htmlFor="l-lat">Latitude</Label>
                 <Input
-                  id="c-phone"
-                  value={draft.contact.phone}
-                  onChange={(e) => update({ contact: { ...draft.contact, phone: e.target.value } })}
+                  id="l-lat"
+                  value={draft.location.latitude}
+                  onChange={(e) =>
+                    update({ location: { ...draft.location, latitude: e.target.value } })
+                  }
                   className="mt-2 rounded-2xl"
                 />
               </div>
               <div>
-                <Label htmlFor="c-email">{t("about.email")}</Label>
+                <Label htmlFor="l-lng">Longitude</Label>
                 <Input
-                  id="c-email"
-                  type="email"
-                  value={draft.contact.email}
-                  onChange={(e) => update({ contact: { ...draft.contact, email: e.target.value } })}
-                  className="mt-2 rounded-2xl"
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <Label htmlFor="c-maps">Google Maps link</Label>
-                <Input
-                  id="c-maps"
-                  value={draft.mapsLink}
-                  onChange={(e) => update({ mapsLink: e.target.value })}
+                  id="l-lng"
+                  value={draft.location.longitude}
+                  onChange={(e) =>
+                    update({ location: { ...draft.location, longitude: e.target.value } })
+                  }
                   className="mt-2 rounded-2xl"
                 />
               </div>
             </div>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="contact" className="mt-6 space-y-6">
+          <Card title={t("about.contact")}>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {(
+                [
+                  ["phone", t("about.phone")],
+                  ["whatsapp", t("contact.whatsapp")],
+                  ["email", t("about.email")],
+                  ["website", t("contact.website")],
+                  ["facebook", t("contact.facebook")],
+                  ["instagram", t("contact.instagram")],
+                  ["youtube", t("contact.youtube")],
+                ] as const
+              ).map(([field, label]) => (
+                <div key={field}>
+                  <Label htmlFor={`c-${field}`}>{label}</Label>
+                  <Input
+                    id={`c-${field}`}
+                    value={draft.contact[field]}
+                    onChange={(e) =>
+                      update({ contact: { ...draft.contact, [field]: e.target.value } })
+                    }
+                    className="mt-2 rounded-2xl"
+                  />
+                </div>
+              ))}
+            </div>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="basics" className="mt-6 space-y-6">
+          <Card title={t("res.basics")}>
+            <ul className="space-y-6">
+              {draft.basics.map((topic, i) => (
+                <li key={topic.id} className="rounded-3xl border border-border p-5">
+                  <p className="text-sm font-semibold text-foreground">{topic.title.en}</p>
+                  <div className="mt-4 grid gap-4">
+                    {languages.map((l) => (
+                      <div key={l.code} className="grid gap-2">
+                        <Label htmlFor={`b-${topic.id}-${l.code}`}>Title · {l.native}</Label>
+                        <Input
+                          id={`b-${topic.id}-${l.code}`}
+                          dir={l.code === "ur" ? "rtl" : "ltr"}
+                          value={topic.title[l.code as Lang]}
+                          onChange={(e) => {
+                            const next = [...draft.basics];
+                            next[i] = {
+                              ...topic,
+                              title: { ...topic.title, [l.code]: e.target.value },
+                            };
+                            update({ basics: next });
+                          }}
+                          className="rounded-2xl"
+                        />
+                        <Label htmlFor={`bb-${topic.id}-${l.code}`}>Text · {l.native}</Label>
+                        <Textarea
+                          id={`bb-${topic.id}-${l.code}`}
+                          rows={2}
+                          dir={l.code === "ur" ? "rtl" : "ltr"}
+                          value={topic.body[l.code as Lang]}
+                          onChange={(e) => {
+                            const next = [...draft.basics];
+                            next[i] = {
+                              ...topic,
+                              body: { ...topic.body, [l.code]: e.target.value },
+                            };
+                            update({ basics: next });
+                          }}
+                          className="rounded-2xl"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </li>
+              ))}
+            </ul>
           </Card>
         </TabsContent>
 
