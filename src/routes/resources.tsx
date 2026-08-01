@@ -7,7 +7,7 @@ import {
   Droplets,
   Moon,
   Coins,
-  Kaaba as KaabaIcon,
+  Compass,
 } from "lucide-react";
 
 import { Navbar } from "@/components/site/Navbar";
@@ -46,7 +46,7 @@ const icons: Record<BasicTopic["icon"], typeof Landmark> = {
   wudu: Droplets,
   ramadan: Moon,
   zakat: Coins,
-  hajj: KaabaIcon,
+  hajj: Compass,
 };
 
 function Resources() {
