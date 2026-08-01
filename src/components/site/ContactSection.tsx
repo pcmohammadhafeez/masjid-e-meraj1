@@ -45,18 +45,18 @@ export function ContactSection() {
                 .map(({ label, value, href, Icon }) => (
                   <li key={label} className="flex min-w-0 gap-4">
                     <span
-                      className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-secondary text-primary"
+                      className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gold/15 text-gold"
                       aria-hidden="true"
                     >
-                      <Icon className="h-4 w-4" />
+                      <Icon className="h-4.5 w-4.5" />
                     </span>
                     <span className="min-w-0">
-                      <span className="block text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                      <span className="block text-[0.68rem] font-medium uppercase tracking-[0.2em] text-muted-foreground">
                         {label}
                       </span>
                       <a
                         href={href}
-                        className="mt-1 block truncate text-sm text-foreground transition-colors hover:text-primary"
+                        className="mt-1 block truncate text-sm font-semibold text-foreground transition-colors hover:text-gold"
                       >
                         {value}
                       </a>
@@ -66,7 +66,7 @@ export function ContactSection() {
             </ul>
 
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+              <p className="text-[0.68rem] font-medium uppercase tracking-[0.22em] text-muted-foreground">
                 {t("contact.social")}
               </p>
               <div className="mt-4 flex gap-3">
@@ -79,9 +79,9 @@ export function ContactSection() {
                       target="_blank"
                       rel="noreferrer"
                       aria-label={label}
-                      className="grid h-11 w-11 place-items-center rounded-full bg-gold text-gold-foreground transition-transform hover:scale-105"
+                      className="grid h-11 w-11 place-items-center rounded-full gradient-gold text-gold-foreground shadow-[var(--shadow-soft)] transition-transform duration-300 hover:-translate-y-0.5 hover:scale-105"
                     >
-                      <Icon className="h-4 w-4" />
+                      <Icon className="h-4.5 w-4.5" />
                     </a>
                   ))}
               </div>
