@@ -542,13 +542,16 @@ function Admin() {
                       accept="application/pdf"
                       className="sr-only"
                       onChange={(e) =>
-                        void onUpload(e, (url, file) =>
+                        void onUpload(e, "quran", (path, file, preview) => {
+                          const old = draft.quranPdfPath;
+                          if (old && old !== path) void removeAsset(old);
                           setDraft((d) => ({
                             ...d,
-                            quranPdfUrl: url,
+                            quranPdfPath: path,
+                            quranPdfUrl: preview,
                             quranPdfName: file.name,
-                          })),
-                        )
+                          }));
+                        })
                       }
                     />
                   </label>
@@ -652,7 +655,11 @@ function Admin() {
                           type="file"
                           accept="image/*"
                           className="sr-only"
-                          onChange={(e) => void onUpload(e, (url) => set("logoUrl", url))}
+                          onChange={(e) =>
+                            void onUpload(e, "branding", (path, _file, preview) =>
+                              setDraft((d) => ({ ...d, logoPath: path, logoUrl: preview })),
+                            )
+                          }
                         />
                       </label>
                     </Button>
@@ -661,7 +668,7 @@ function Admin() {
                         variant="outline"
                         size="sm"
                         className="rounded-full"
-                        onClick={() => set("logoUrl", "")}
+                        onClick={() => setDraft((d) => ({ ...d, logoPath: "", logoUrl: "" }))}
                       >
                         Remove
                       </Button>
@@ -688,7 +695,11 @@ function Admin() {
                           type="file"
                           accept="image/*"
                           className="sr-only"
-                          onChange={(e) => void onUpload(e, (url) => set("heroImageUrl", url))}
+                          onChange={(e) =>
+                            void onUpload(e, "branding", (path, _file, preview) =>
+                              setDraft((d) => ({ ...d, heroPath: path, heroImageUrl: preview })),
+                            )
+                          }
                         />
                       </label>
                     </Button>
@@ -697,7 +708,7 @@ function Admin() {
                         variant="outline"
                         size="sm"
                         className="rounded-full"
-                        onClick={() => set("heroImageUrl", "")}
+                        onClick={() => setDraft((d) => ({ ...d, heroPath: "", heroImageUrl: "" }))}
                       >
                         Remove
                       </Button>
