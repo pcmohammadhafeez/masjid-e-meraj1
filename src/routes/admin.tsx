@@ -304,8 +304,11 @@ function Admin() {
               variant="gold"
               className="rounded-full"
               onClick={() => {
-                saveContent(draft);
-                toast.success(t("admin.saved"));
+                void saveContent(draft)
+                  .then(() => toast.success(t("admin.saved")))
+                  .catch((err: unknown) =>
+                    toast.error(err instanceof Error ? err.message : "Save failed"),
+                  );
               }}
             >
               <Save /> {t("admin.save")}
@@ -321,14 +324,16 @@ function Admin() {
               variant="outline"
               className="rounded-full"
               onClick={() => {
-                resetContent();
-                setDraft(defaultContent);
-                toast.success(t("admin.resetDone"));
+                void resetContent()
+                  .then(() => toast.success(t("admin.resetDone")))
+                  .catch((err: unknown) =>
+                    toast.error(err instanceof Error ? err.message : "Reset failed"),
+                  );
               }}
             >
               <RotateCcw /> {t("admin.reset")}
             </Button>
-            <Button variant="outline" className="rounded-full" onClick={logout}>
+            <Button variant="outline" className="rounded-full" onClick={() => void logout()}>
               <LogOut /> {t("admin.signOut")}
             </Button>
           </div>
