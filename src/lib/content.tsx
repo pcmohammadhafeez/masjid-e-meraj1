@@ -250,8 +250,11 @@ export const defaultContent: SiteContent = {
   },
   quranPdfUrl: "",
   quranPdfName: "",
+  quranPdfPath: "",
   logoUrl: "",
   heroImageUrl: "",
+  logoPath: "",
+  heroPath: "",
   dailyVerse: {
     reference: "Surah Al-Qamar 54:17",
     arabic: "وَلَقَدْ يَسَّرْنَا الْقُرْآنَ لِلذِّكْرِ فَهَلْ مِن مُّدَّكِرٍ",
