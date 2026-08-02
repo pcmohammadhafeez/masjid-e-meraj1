@@ -1,5 +1,6 @@
 import { useEffect, useState, type ChangeEvent } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { Lock, LogOut, Save, RotateCcw, Plus, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
@@ -13,12 +14,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   defaultContent,
   emptyMultilingual,
+  removeAsset,
+  uploadAsset,
   useContent,
   type Announcement,
   type Multilingual,
   type PrayerKey,
   type SiteContent,
 } from "@/lib/content";
+import { claimAdminRole } from "@/lib/admin.functions";
 import { useI18n, type Lang } from "@/lib/i18n";
 
 export const Route = createFileRoute("/admin")({
@@ -50,15 +54,6 @@ const LANGS: { key: Lang; label: string }[] = [
 ];
 
 const PRAYERS: PrayerKey[] = ["fajr", "sunrise", "dhuhr", "asr", "maghrib", "isha", "jumuah"];
-
-function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(new Error("read failed"));
-    reader.readAsDataURL(file);
-  });
-}
 
 /** Three stacked inputs (one per language) for a multilingual value. */
 function MultilingualField({
