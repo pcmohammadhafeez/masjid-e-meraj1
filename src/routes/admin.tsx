@@ -1,5 +1,6 @@
 import { useEffect, useState, type ChangeEvent } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { Lock, LogOut, Save, RotateCcw, Plus, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
@@ -13,12 +14,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   defaultContent,
   emptyMultilingual,
+  removeAsset,
+  uploadAsset,
   useContent,
   type Announcement,
   type Multilingual,
   type PrayerKey,
   type SiteContent,
 } from "@/lib/content";
+import { claimAdminRole } from "@/lib/admin.functions";
 import { useI18n, type Lang } from "@/lib/i18n";
 
 export const Route = createFileRoute("/admin")({
@@ -50,15 +54,6 @@ const LANGS: { key: Lang; label: string }[] = [
 ];
 
 const PRAYERS: PrayerKey[] = ["fajr", "sunrise", "dhuhr", "asr", "maghrib", "isha", "jumuah"];
-
-function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(new Error("read failed"));
-    reader.readAsDataURL(file);
-  });
-}
 
 /** Three stacked inputs (one per language) for a multilingual value. */
 function MultilingualField({
@@ -139,38 +134,77 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
 }
 
 function Admin() {
-  const { content, saveContent, resetContent, isAdmin, login, logout } = useContent();
+  const {
+    content,
+    saveContent,
+    resetContent,
+    isAdmin,
+    session,
+    refreshRole,
+    login,
+    signUp,
+    logout,
+  } = useContent();
   const { t } = useI18n();
+  const claimAdmin = useServerFn(claimAdminRole);
 
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(false);
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
   const [draft, setDraft] = useState<SiteContent>(content);
 
   useEffect(() => {
     setDraft(content);
   }, [content]);
 
+  // The first committee account to sign in becomes the administrator.
+  useEffect(() => {
+    if (!session || isAdmin) return;
+    void (async () => {
+      try {
+        const result = await claimAdmin();
+        if (result.claimed) await refreshRole();
+      } catch (err) {
+        console.error("[admin] role check failed", err);
+      }
+    })();
+  }, [session, isAdmin, claimAdmin, refreshRole]);
+
   const set = <K extends keyof SiteContent>(key: K, value: SiteContent[K]) =>
     setDraft((d) => ({ ...d, [key]: value }));
 
-  const onSubmitLogin = (e: React.FormEvent) => {
+  const onSubmitLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (login(username, password)) {
-      setError(false);
-      setPassword("");
-    } else {
-      setError(true);
+    setBusy(true);
+    setError(null);
+    const message = mode === "signin" ? await login(email, password) : await signUp(email, password);
+    setBusy(false);
+    if (message) {
+      setError(message);
+      return;
     }
+    setPassword("");
   };
 
+  /** Uploads to cloud storage and hands back the stored path. */
   const onUpload = async (
     e: ChangeEvent<HTMLInputElement>,
-    apply: (dataUrl: string, file: File) => void,
+    folder: string,
+    apply: (path: string, file: File, previewUrl: string) => void,
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    apply(await readFileAsDataUrl(file), file);
+    try {
+      const path = await uploadAsset(folder, file);
+      apply(path, file, URL.createObjectURL(file));
+      toast.success("Uploaded");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      e.target.value = "";
+    }
   };
 
   if (!isAdmin) {
@@ -179,7 +213,7 @@ function Admin() {
         <Navbar transparent={false} />
         <main className="grid place-items-center px-5 py-32 sm:px-8">
           <form
-            onSubmit={onSubmitLogin}
+            onSubmit={(e) => void onSubmitLogin(e)}
             className="glass-card w-full max-w-md rounded-[2rem] p-8"
             aria-labelledby="admin-login-title"
           >
@@ -194,7 +228,7 @@ function Admin() {
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">{t("admin.hint")}</p>
             <div className="mt-6 space-y-4">
-              <Field label={t("admin.username")} value={username} onChange={setUsername} />
+              <Field label="Email" value={email} onChange={setEmail} type="email" />
               <Field
                 label={t("admin.password")}
                 value={password}
@@ -202,14 +236,49 @@ function Admin() {
                 type="password"
               />
             </div>
-            {error && (
-              <p role="alert" className="mt-4 text-sm font-medium text-destructive">
-                {t("admin.wrong")}
+            {session && !error && (
+              <p role="status" className="mt-4 text-sm text-muted-foreground">
+                Signed in as {session.user.email}, but this account has no admin access.
               </p>
             )}
-            <Button type="submit" variant="gold" className="mt-6 w-full rounded-full">
-              {t("admin.signIn")}
+            {error && (
+              <p role="alert" className="mt-4 text-sm font-medium text-destructive">
+                {error}
+              </p>
+            )}
+            <Button
+              type="submit"
+              variant="gold"
+              className="mt-6 w-full rounded-full"
+              disabled={busy}
+            >
+              {mode === "signin" ? t("admin.signIn") : "Create admin account"}
             </Button>
+            <div className="mt-4 flex flex-wrap justify-between gap-3">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="rounded-full"
+                onClick={() => {
+                  setMode((m) => (m === "signin" ? "signup" : "signin"));
+                  setError(null);
+                }}
+              >
+                {mode === "signin" ? "First time? Create account" : "Already have an account?"}
+              </Button>
+              {session && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full"
+                  onClick={() => void logout()}
+                >
+                  <LogOut /> {t("admin.signOut")}
+                </Button>
+              )}
+            </div>
           </form>
         </main>
         <Footer />
@@ -235,8 +304,11 @@ function Admin() {
               variant="gold"
               className="rounded-full"
               onClick={() => {
-                saveContent(draft);
-                toast.success(t("admin.saved"));
+                void saveContent(draft)
+                  .then(() => toast.success(t("admin.saved")))
+                  .catch((err: unknown) =>
+                    toast.error(err instanceof Error ? err.message : "Save failed"),
+                  );
               }}
             >
               <Save /> {t("admin.save")}
@@ -252,14 +324,16 @@ function Admin() {
               variant="outline"
               className="rounded-full"
               onClick={() => {
-                resetContent();
-                setDraft(defaultContent);
-                toast.success(t("admin.resetDone"));
+                void resetContent()
+                  .then(() => toast.success(t("admin.resetDone")))
+                  .catch((err: unknown) =>
+                    toast.error(err instanceof Error ? err.message : "Reset failed"),
+                  );
               }}
             >
               <RotateCcw /> {t("admin.reset")}
             </Button>
-            <Button variant="outline" className="rounded-full" onClick={logout}>
+            <Button variant="outline" className="rounded-full" onClick={() => void logout()}>
               <LogOut /> {t("admin.signOut")}
             </Button>
           </div>
@@ -473,13 +547,16 @@ function Admin() {
                       accept="application/pdf"
                       className="sr-only"
                       onChange={(e) =>
-                        void onUpload(e, (url, file) =>
+                        void onUpload(e, "quran", (path, file, preview) => {
+                          const old = draft.quranPdfPath;
+                          if (old && old !== path) void removeAsset(old);
                           setDraft((d) => ({
                             ...d,
-                            quranPdfUrl: url,
+                            quranPdfPath: path,
+                            quranPdfUrl: preview,
                             quranPdfName: file.name,
-                          })),
-                        )
+                          }));
+                        })
                       }
                     />
                   </label>
@@ -583,7 +660,11 @@ function Admin() {
                           type="file"
                           accept="image/*"
                           className="sr-only"
-                          onChange={(e) => void onUpload(e, (url) => set("logoUrl", url))}
+                          onChange={(e) =>
+                            void onUpload(e, "branding", (path, _file, preview) =>
+                              setDraft((d) => ({ ...d, logoPath: path, logoUrl: preview })),
+                            )
+                          }
                         />
                       </label>
                     </Button>
@@ -592,7 +673,7 @@ function Admin() {
                         variant="outline"
                         size="sm"
                         className="rounded-full"
-                        onClick={() => set("logoUrl", "")}
+                        onClick={() => setDraft((d) => ({ ...d, logoPath: "", logoUrl: "" }))}
                       >
                         Remove
                       </Button>
@@ -619,7 +700,11 @@ function Admin() {
                           type="file"
                           accept="image/*"
                           className="sr-only"
-                          onChange={(e) => void onUpload(e, (url) => set("heroImageUrl", url))}
+                          onChange={(e) =>
+                            void onUpload(e, "branding", (path, _file, preview) =>
+                              setDraft((d) => ({ ...d, heroPath: path, heroImageUrl: preview })),
+                            )
+                          }
                         />
                       </label>
                     </Button>
@@ -628,7 +713,7 @@ function Admin() {
                         variant="outline"
                         size="sm"
                         className="rounded-full"
-                        onClick={() => set("heroImageUrl", "")}
+                        onClick={() => setDraft((d) => ({ ...d, heroPath: "", heroImageUrl: "" }))}
                       >
                         Remove
                       </Button>

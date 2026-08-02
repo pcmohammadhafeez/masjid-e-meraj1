@@ -15,7 +15,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useContent } from "@/lib/content";
 import { useI18n } from "@/lib/i18n";
-import quranAsset from "@/assets/quran-majeed.pdf.asset.json";
 
 export function QuranViewer() {
   const { content } = useContent();
@@ -27,9 +26,8 @@ export function QuranViewer() {
   const [fitWidth, setFitWidth] = useState(true);
   const frameWrapRef = useRef<HTMLDivElement>(null);
 
-  // Uploaded PDF wins; otherwise fall back to the public static file, which
-  // works identically in development and after deployment.
-  const pdfUrl = content.quranPdfUrl || quranAsset.url;
+  // Always served from cloud storage, so it works on every deployment target.
+  const pdfUrl = content.quranPdfUrl;
   const src = `${pdfUrl}#page=${page}&zoom=${fitWidth ? "page-width" : zoom}${
     fitWidth ? "&view=FitH" : ""
   }${term ? `&search=${encodeURIComponent(term)}` : ""}`;

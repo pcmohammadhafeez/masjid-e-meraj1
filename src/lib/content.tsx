@@ -1,13 +1,28 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
+import type { Session } from "@supabase/supabase-js";
+
+import { supabase } from "@/integrations/supabase/client";
 import type { Lang } from "./i18n";
 
 /**
- * Front-end content store.
+ * Site content store — backed entirely by the cloud database.
  *
- * Everything the admin can edit lives here. Today it persists to localStorage;
- * swapping `loadContent`/`persistContent` for API calls (Lovable Cloud) later
- * is the only change needed for real backend integration.
+ * Visitors read published content with the public (anon) key; only signed-in
+ * admins can write. Nothing important is kept in localStorage, so the site
+ * behaves identically on the Lovable preview, Vercel preview, Vercel
+ * production and any custom domain.
  */
+
+/** Bucket that holds every uploaded file (Quran PDF, logo, hero image). */
+export const ASSET_BUCKET = "site-assets";
 
 export type Multilingual = Record<Lang, string>;
 
@@ -57,8 +72,13 @@ export type SiteContent = {
   location: MasjidLocation;
   quranPdfUrl: string;
   quranPdfName: string;
+  /** Raw storage path of the Quran PDF (empty when an external URL is used). */
+  quranPdfPath: string;
   logoUrl: string;
   heroImageUrl: string;
+  /** Raw storage paths for branding uploads. */
+  logoPath: string;
+  heroPath: string;
   dailyVerse: { reference: string; arabic: string; translation: Multilingual };
   dailyHadith: { source: string; arabic: string; text: Multilingual };
   basics: BasicTopic[];
@@ -230,8 +250,11 @@ export const defaultContent: SiteContent = {
   },
   quranPdfUrl: "",
   quranPdfName: "",
+  quranPdfPath: "",
   logoUrl: "",
   heroImageUrl: "",
+  logoPath: "",
+  heroPath: "",
   dailyVerse: {
     reference: "Surah Al-Qamar 54:17",
     arabic: "وَلَقَدْ يَسَّرْنَا الْقُرْآنَ لِلذِّكْرِ فَهَلْ مِن مُّدَّكِرٍ",
@@ -253,29 +276,11 @@ export const defaultContent: SiteContent = {
   basics,
 };
 
-const CONTENT_KEY = "mem-content";
-const ADMIN_KEY = "mem-admin";
-/** Development-only credentials. Replace with real auth when the backend is added. */
-export const ADMIN_USERNAME = "admin";
-export const ADMIN_PASSWORD = "12345678910";
+/* ------------------------------------------------------------------ *
+ * Cloud-backed store
+ * ------------------------------------------------------------------ */
 
-type ContentContextValue = {
-  content: SiteContent;
-  saveContent: (next: SiteContent) => void;
-  resetContent: () => void;
-  isAdmin: boolean;
-  login: (username: string, password: string) => boolean;
-  logout: () => void;
-};
-
-const ContentContext = createContext<ContentContextValue>({
-  content: defaultContent,
-  saveContent: () => {},
-  resetContent: () => {},
-  isAdmin: false,
-  login: () => false,
-  logout: () => {},
-});
+type Row = Record<string, unknown>;
 
 /** Accepts a legacy plain string or a partial multilingual record. */
 function toMultilingual(value: unknown, fallback: Multilingual): Multilingual {
@@ -287,94 +292,334 @@ function toMultilingual(value: unknown, fallback: Multilingual): Multilingual {
   return fallback;
 }
 
-/** Normalises anything previously stored (older shapes) into the current schema. */
-function migrate(parsed: Record<string, unknown>): SiteContent {
-  const merged = { ...defaultContent, ...parsed } as SiteContent & Record<string, unknown>;
+const str = (v: unknown, fallback = "") => (typeof v === "string" && v ? v : fallback);
 
-  const legacyAbout = parsed["about"];
-  merged.aboutSummary = toMultilingual(
-    parsed["aboutSummary"] ?? legacyAbout,
-    defaultContent.aboutSummary,
-  );
-  merged.aboutFull = toMultilingual(parsed["aboutFull"] ?? legacyAbout, defaultContent.aboutFull);
+/**
+ * Turns a stored value into something a browser can load. Absolute URLs pass
+ * through untouched; anything else is treated as a path inside the private
+ * asset bucket and resolved to a time-limited signed URL.
+ */
+async function resolveAsset(value: string): Promise<string> {
+  if (!value) return "";
+  if (/^https?:\/\//i.test(value) || value.startsWith("data:")) return value;
+  const { data } = await supabase.storage.from(ASSET_BUCKET).createSignedUrl(value, 60 * 60 * 24 * 7);
+  return data?.signedUrl ?? "";
+}
 
-  const anns = Array.isArray(parsed["announcements"])
-    ? (parsed["announcements"] as Record<string, unknown>[])
-    : [];
-  if (anns.length) {
-    merged.announcements = anns.map((a, i) => ({
-      id: String(a["id"] ?? `a${i}`),
-      date: String(a["date"] ?? ""),
-      title: toMultilingual(a["title"], emptyMultilingual),
-      body: toMultilingual(a["body"], emptyMultilingual),
-    }));
-  }
+export async function fetchContent(): Promise<SiteContent> {
+  const [times, anns, about, settings, quran, verse, hadith] = await Promise.all([
+    supabase.from("prayer_times").select("*").eq("id", "default").maybeSingle(),
+    supabase.from("announcements").select("*").order("position", { ascending: true }),
+    supabase.from("about_masjid").select("*").eq("id", "default").maybeSingle(),
+    supabase.from("settings").select("*").eq("id", "default").maybeSingle(),
+    supabase.from("quran_pdf").select("*").eq("id", "default").maybeSingle(),
+    supabase.from("daily_verse").select("*").eq("id", "default").maybeSingle(),
+    supabase.from("daily_hadith").select("*").eq("id", "default").maybeSingle(),
+  ]);
 
-  merged.dailyHadith = {
-    source: merged.dailyHadith?.source ?? defaultContent.dailyHadith.source,
-    arabic: merged.dailyHadith?.arabic ?? defaultContent.dailyHadith.arabic,
-    text: toMultilingual(merged.dailyHadith?.text, defaultContent.dailyHadith.text),
+  const t = (times.data ?? {}) as Row;
+  const ab = (about.data ?? {}) as Row;
+  const st = (settings.data ?? {}) as Row;
+  const qr = (quran.data ?? {}) as Row;
+  const dv = (verse.data ?? {}) as Row;
+  const dh = (hadith.data ?? {}) as Row;
+
+  const storedTimes = (t["times"] ?? {}) as Record<string, unknown>;
+  const prayerTimes = { ...defaultContent.prayerTimes };
+  (Object.keys(prayerTimes) as PrayerKey[]).forEach((k) => {
+    prayerTimes[k] = str(storedTimes[k], defaultContent.prayerTimes[k]);
+  });
+
+  const announcements: Announcement[] = ((anns.data ?? []) as Row[]).map((a) => ({
+    id: String(a["id"]),
+    date: str(a["date_label"]),
+    title: toMultilingual(a["title"], emptyMultilingual),
+    body: toMultilingual(a["body"], emptyMultilingual),
+  }));
+
+  const contact = { ...defaultContent.contact, ...((st["contact"] ?? {}) as object) };
+  const location = { ...defaultContent.location, ...((st["location"] ?? {}) as object) };
+  const rawBasics = st["basics"];
+  const basicsList: BasicTopic[] = Array.isArray(rawBasics) && rawBasics.length
+    ? (rawBasics as Row[]).map((b, i) => ({
+        id: str(b["id"], `topic-${i}`),
+        icon: (str(b["icon"], "pillars") as BasicTopic["icon"]),
+        title: toMultilingual(b["title"], emptyMultilingual),
+        body: toMultilingual(b["body"], emptyMultilingual),
+      }))
+    : defaultContent.basics;
+
+  const quranPdfPath = str(qr["storage_path"]);
+  const quranStored = str(qr["url"]) || quranPdfPath;
+  const logoPath = str(st["logo_url"]);
+  const heroPath = str(st["hero_image_url"]);
+
+  const [quranPdfUrl, logoUrl, heroImageUrl] = await Promise.all([
+    resolveAsset(quranStored),
+    resolveAsset(logoPath),
+    resolveAsset(heroPath),
+  ]);
+
+  return {
+    prayerTimes,
+    jumuahKhutbah: str(t["jumuah_khutbah"], defaultContent.jumuahKhutbah),
+    announcements: announcements.length ? announcements : [],
+    aboutSummary: toMultilingual(ab["summary"], defaultContent.aboutSummary),
+    aboutFull: toMultilingual(ab["full_text"], defaultContent.aboutFull),
+    contact,
+    location,
+    quranPdfUrl,
+    quranPdfName: str(qr["name"]),
+    quranPdfPath: str(qr["url"]) || quranPdfPath,
+    logoUrl,
+    heroImageUrl,
+    logoPath,
+    heroPath,
+    dailyVerse: {
+      reference: str(dv["reference"], defaultContent.dailyVerse.reference),
+      arabic: str(dv["arabic"], defaultContent.dailyVerse.arabic),
+      translation: toMultilingual(dv["translation"], defaultContent.dailyVerse.translation),
+    },
+    dailyHadith: {
+      source: str(dh["source"], defaultContent.dailyHadith.source),
+      arabic: str(dh["arabic"], defaultContent.dailyHadith.arabic),
+      text: toMultilingual(dh["text"], defaultContent.dailyHadith.text),
+    },
+    basics: basicsList,
   };
-  merged.logoUrl = typeof merged.logoUrl === "string" ? merged.logoUrl : "";
-  merged.heroImageUrl = typeof merged.heroImageUrl === "string" ? merged.heroImageUrl : "";
-
-  delete (merged as Record<string, unknown>)["about"];
-  return merged;
 }
 
-function loadContent(): SiteContent | null {
-  try {
-    const raw = window.localStorage.getItem(CONTENT_KEY);
-    if (!raw) return null;
-    return migrate(JSON.parse(raw) as Record<string, unknown>);
-  } catch {
-    return null;
+/** Writes the whole editable site content back to the database (admins only). */
+export async function persistContent(next: SiteContent): Promise<void> {
+  const isUrl = (v: string) => /^https?:\/\//i.test(v);
+
+  const results = await Promise.all([
+    supabase
+      .from("prayer_times")
+      .upsert({ id: "default", times: next.prayerTimes, jumuah_khutbah: next.jumuahKhutbah }),
+    supabase
+      .from("about_masjid")
+      .upsert({ id: "default", summary: next.aboutSummary, full_text: next.aboutFull }),
+    supabase.from("settings").upsert({
+      id: "default",
+      contact: next.contact,
+      location: next.location,
+      logo_url: next.logoPath,
+      hero_image_url: next.heroPath,
+      basics: next.basics,
+    }),
+    supabase.from("quran_pdf").upsert({
+      id: "default",
+      url: isUrl(next.quranPdfPath) ? next.quranPdfPath : "",
+      storage_path: isUrl(next.quranPdfPath) ? "" : next.quranPdfPath,
+      name: next.quranPdfName,
+    }),
+    supabase.from("daily_verse").upsert({
+      id: "default",
+      reference: next.dailyVerse.reference,
+      arabic: next.dailyVerse.arabic,
+      translation: next.dailyVerse.translation,
+    }),
+    supabase.from("daily_hadith").upsert({
+      id: "default",
+      source: next.dailyHadith.source,
+      arabic: next.dailyHadith.arabic,
+      text: next.dailyHadith.text,
+    }),
+  ]);
+
+  const failed = results.find((r) => r.error);
+  if (failed?.error) throw new Error(failed.error.message);
+
+  // Announcements are a list: replace it wholesale so deletions stick too.
+  const existing = await supabase.from("announcements").select("id");
+  if (existing.error) throw new Error(existing.error.message);
+  const keep = new Set(next.announcements.map((a) => a.id));
+  const removable = (existing.data ?? []).map((r) => r.id).filter((id) => !keep.has(id));
+  if (removable.length) {
+    const del = await supabase.from("announcements").delete().in("id", removable);
+    if (del.error) throw new Error(del.error.message);
+  }
+
+  const isUuid = (v: string) =>
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
+
+  for (const [i, a] of next.announcements.entries()) {
+    const payload = { position: i, date_label: a.date, title: a.title, body: a.body };
+    const res = isUuid(a.id)
+      ? await supabase.from("announcements").upsert({ id: a.id, ...payload })
+      : await supabase.from("announcements").insert(payload);
+    if (res.error) throw new Error(res.error.message);
   }
 }
+
+/** Uploads a file to the asset bucket and returns its storage path. */
+export async function uploadAsset(folder: string, file: File): Promise<string> {
+  const safe = file.name.replace(/[^a-zA-Z0-9._-]+/g, "-");
+  const path = `${folder}/${Date.now()}-${safe}`;
+  const { error } = await supabase.storage
+    .from(ASSET_BUCKET)
+    .upload(path, file, { upsert: true, contentType: file.type || undefined });
+  if (error) throw new Error(error.message);
+  return path;
+}
+
+/** Removes a previously uploaded file (used when replacing the Quran PDF). */
+export async function removeAsset(path: string): Promise<void> {
+  if (!path || /^https?:\/\//i.test(path)) return;
+  await supabase.storage.from(ASSET_BUCKET).remove([path]);
+}
+
+type ContentContextValue = {
+  content: SiteContent;
+  loading: boolean;
+  refresh: () => Promise<void>;
+  saveContent: (next: SiteContent) => Promise<void>;
+  resetContent: () => Promise<void>;
+  session: Session | null;
+  isAdmin: boolean;
+  refreshRole: () => Promise<void>;
+  login: (email: string, password: string) => Promise<string | null>;
+  signUp: (email: string, password: string) => Promise<string | null>;
+  logout: () => Promise<void>;
+};
+
+const ContentContext = createContext<ContentContextValue>({
+  content: defaultContent,
+  loading: true,
+  refresh: async () => {},
+  saveContent: async () => {},
+  resetContent: async () => {},
+  session: null,
+  isAdmin: false,
+  refreshRole: async () => {},
+  login: async () => "Not ready",
+  signUp: async () => "Not ready",
+  logout: async () => {},
+});
 
 export function ContentProvider({ children }: { children: ReactNode }) {
   const [content, setContent] = useState<SiteContent>(defaultContent);
+  const [loading, setLoading] = useState(true);
+  const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  useEffect(() => {
-    const stored = loadContent();
-    if (stored) setContent(stored);
-    setIsAdmin(window.sessionStorage.getItem(ADMIN_KEY) === "1");
-  }, []);
-
-  const saveContent = useCallback((next: SiteContent) => {
-    setContent(next);
+  const refresh = useCallback(async () => {
     try {
-      window.localStorage.setItem(CONTENT_KEY, JSON.stringify(next));
-    } catch {
-      /* storage full — uploaded files can be large; content stays live in memory */
+      setContent(await fetchContent());
+    } catch (error) {
+      console.error("[content] failed to load", error);
+    } finally {
+      setLoading(false);
     }
   }, []);
 
-  const resetContent = useCallback(() => {
-    setContent(defaultContent);
-    window.localStorage.removeItem(CONTENT_KEY);
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
+  const syncRole = useCallback(async (next: Session | null) => {
+    if (!next?.user) {
+      setIsAdmin(false);
+      return;
+    }
+    const { data } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", next.user.id)
+      .eq("role", "admin")
+      .maybeSingle();
+    setIsAdmin(Boolean(data));
   }, []);
 
-  const login = useCallback((username: string, password: string) => {
-    if (username.trim() !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) return false;
-    window.sessionStorage.setItem(ADMIN_KEY, "1");
-    setIsAdmin(true);
-    return true;
+  // Session + admin role. Kept in Supabase auth, never in app localStorage.
+  useEffect(() => {
+    void supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+      void syncRole(data.session);
+    });
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
+      setSession(next);
+      void syncRole(next);
+    });
+
+    return () => {
+      sub.subscription.unsubscribe();
+    };
+  }, [syncRole]);
+
+  const refreshRole = useCallback(async () => {
+    const { data } = await supabase.auth.getSession();
+    setSession(data.session);
+    await syncRole(data.session);
+  }, [syncRole]);
+
+  const saveContent = useCallback(
+    async (next: SiteContent) => {
+      await persistContent(next);
+      await refresh();
+    },
+    [refresh],
+  );
+
+  const resetContent = useCallback(async () => {
+    await persistContent({ ...defaultContent, announcements: [] });
+    await refresh();
+  }, [refresh]);
+
+  const login = useCallback(async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
+    return error ? error.message : null;
   }, []);
 
-  const logout = useCallback(() => {
-    window.sessionStorage.removeItem(ADMIN_KEY);
+  const signUp = useCallback(async (email: string, password: string) => {
+    const { error } = await supabase.auth.signUp({
+      email: email.trim(),
+      password,
+      options: { emailRedirectTo: `${window.location.origin}/admin` },
+    });
+    return error ? error.message : null;
+  }, []);
+
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut();
     setIsAdmin(false);
   }, []);
 
-  return (
-    <ContentContext.Provider
-      value={{ content, saveContent, resetContent, isAdmin, login, logout }}
-    >
-      {children}
-    </ContentContext.Provider>
+  const value = useMemo(
+    () => ({
+      content,
+      loading,
+      refresh,
+      saveContent,
+      resetContent,
+      session,
+      isAdmin,
+      refreshRole,
+      login,
+      signUp,
+      logout,
+    }),
+    [
+      content,
+      loading,
+      refresh,
+      saveContent,
+      resetContent,
+      session,
+      isAdmin,
+      refreshRole,
+      login,
+      signUp,
+      logout,
+    ],
   );
+
+  return <ContentContext.Provider value={value}>{children}</ContentContext.Provider>;
 }
 
 export const useContent = () => useContext(ContentContext);
