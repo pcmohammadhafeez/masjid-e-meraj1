@@ -1,13 +1,28 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
+import type { Session } from "@supabase/supabase-js";
+
+import { supabase } from "@/integrations/supabase/client";
 import type { Lang } from "./i18n";
 
 /**
- * Front-end content store.
+ * Site content store — backed entirely by the cloud database.
  *
- * Everything the admin can edit lives here. Today it persists to localStorage;
- * swapping `loadContent`/`persistContent` for API calls (Lovable Cloud) later
- * is the only change needed for real backend integration.
+ * Visitors read published content with the public (anon) key; only signed-in
+ * admins can write. Nothing important is kept in localStorage, so the site
+ * behaves identically on the Lovable preview, Vercel preview, Vercel
+ * production and any custom domain.
  */
+
+/** Bucket that holds every uploaded file (Quran PDF, logo, hero image). */
+export const ASSET_BUCKET = "site-assets";
 
 export type Multilingual = Record<Lang, string>;
 
@@ -57,8 +72,13 @@ export type SiteContent = {
   location: MasjidLocation;
   quranPdfUrl: string;
   quranPdfName: string;
+  /** Raw storage path of the Quran PDF (empty when an external URL is used). */
+  quranPdfPath: string;
   logoUrl: string;
   heroImageUrl: string;
+  /** Raw storage paths for branding uploads. */
+  logoPath: string;
+  heroPath: string;
   dailyVerse: { reference: string; arabic: string; translation: Multilingual };
   dailyHadith: { source: string; arabic: string; text: Multilingual };
   basics: BasicTopic[];
