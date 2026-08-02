@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 export function ReadQuranSection() {
   return (
     <Reveal delay={80}>
-      <div className="mt-5 rounded-[2rem] glass-card p-5 text-center sm:rounded-[2.5rem] sm:p-7">
+      <div className="rounded-[2rem] glass-card p-5 text-center sm:rounded-[2.5rem] sm:p-7">
         <div className="flex items-center justify-center gap-3">
           <span
             className="icon-chip grid h-9 w-9 shrink-0 place-items-center rounded-xl text-gold"

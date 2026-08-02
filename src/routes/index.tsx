@@ -42,8 +42,10 @@ function Index() {
         <PrayerTimes />
         <section className="gradient-sand pb-8 sm:pb-12">
           <div className="mx-auto max-w-3xl px-5 sm:px-8">
-            <LocationSection />
             <ReadQuranSection />
+            <div className="mt-5">
+              <LocationSection />
+            </div>
             <Reveal delay={120}>
               <div className="mt-5 flex justify-center">
                 <Button
