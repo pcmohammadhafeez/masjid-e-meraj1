@@ -478,6 +478,7 @@ type ContentContextValue = {
   resetContent: () => Promise<void>;
   session: Session | null;
   isAdmin: boolean;
+  refreshRole: () => Promise<void>;
   login: (email: string, password: string) => Promise<string | null>;
   signUp: (email: string, password: string) => Promise<string | null>;
   logout: () => Promise<void>;
@@ -491,6 +492,7 @@ const ContentContext = createContext<ContentContextValue>({
   resetContent: async () => {},
   session: null,
   isAdmin: false,
+  refreshRole: async () => {},
   login: async () => "Not ready",
   signUp: async () => "Not ready",
   logout: async () => {},
@@ -516,26 +518,23 @@ export function ContentProvider({ children }: { children: ReactNode }) {
     void refresh();
   }, [refresh]);
 
+  const syncRole = useCallback(async (next: Session | null) => {
+    if (!next?.user) {
+      setIsAdmin(false);
+      return;
+    }
+    const { data } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", next.user.id)
+      .eq("role", "admin")
+      .maybeSingle();
+    setIsAdmin(Boolean(data));
+  }, []);
+
   // Session + admin role. Kept in Supabase auth, never in app localStorage.
   useEffect(() => {
-    let active = true;
-
-    const syncRole = async (next: Session | null) => {
-      if (!next?.user) {
-        if (active) setIsAdmin(false);
-        return;
-      }
-      const { data } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", next.user.id)
-        .eq("role", "admin")
-        .maybeSingle();
-      if (active) setIsAdmin(Boolean(data));
-    };
-
     void supabase.auth.getSession().then(({ data }) => {
-      if (!active) return;
       setSession(data.session);
       void syncRole(data.session);
     });
@@ -546,10 +545,15 @@ export function ContentProvider({ children }: { children: ReactNode }) {
     });
 
     return () => {
-      active = false;
       sub.subscription.unsubscribe();
     };
-  }, []);
+  }, [syncRole]);
+
+  const refreshRole = useCallback(async () => {
+    const { data } = await supabase.auth.getSession();
+    setSession(data.session);
+    await syncRole(data.session);
+  }, [syncRole]);
 
   const saveContent = useCallback(
     async (next: SiteContent) => {
@@ -595,11 +599,24 @@ export function ContentProvider({ children }: { children: ReactNode }) {
       resetContent,
       session,
       isAdmin,
+      refreshRole,
       login,
       signUp,
       logout,
     }),
-    [content, loading, refresh, saveContent, resetContent, session, isAdmin, login, signUp, logout],
+    [
+      content,
+      loading,
+      refresh,
+      saveContent,
+      resetContent,
+      session,
+      isAdmin,
+      refreshRole,
+      login,
+      signUp,
+      logout,
+    ],
   );
 
   return <ContentContext.Provider value={value}>{children}</ContentContext.Provider>;
