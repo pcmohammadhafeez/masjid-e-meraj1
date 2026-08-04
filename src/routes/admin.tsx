@@ -1,7 +1,7 @@
 import { useEffect, useState, type ChangeEvent } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Lock, LogOut, Save, RotateCcw, Plus, Trash2 } from "lucide-react";
+import { Lock, LogOut, Save, RotateCcw, Plus, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 import { Navbar } from "@/components/site/Navbar";
