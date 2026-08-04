@@ -122,7 +122,7 @@ export function QuranReader() {
 
   /* ---------- navigation ---------- */
   const goTo = useCallback(
-    (target: number) => {
+    (target: number, instant = false) => {
       if (!total) return;
       const next = clamp(Math.round(target), 1, total);
       setPage(next);
@@ -130,12 +130,16 @@ export function QuranReader() {
       if (!el) return;
       const slot = el.children[next - 1] as HTMLElement | undefined;
       if (!slot) return;
+      const behavior: ScrollBehavior = instant ? "auto" : "smooth";
       fromScroll.current = true;
-      if (mode === "swipe") el.scrollTo({ left: (next - 1) * el.clientWidth, behavior: "smooth" });
-      else el.scrollTo({ top: slot.offsetTop, behavior: "smooth" });
-      window.setTimeout(() => {
-        fromScroll.current = false;
-      }, 450);
+      if (mode === "swipe") el.scrollTo({ left: (next - 1) * el.clientWidth, behavior });
+      else el.scrollTo({ top: slot.offsetTop, behavior });
+      window.setTimeout(
+        () => {
+          fromScroll.current = false;
+        },
+        instant ? 120 : 450,
+      );
     },
     [mode, total],
   );
@@ -240,7 +244,7 @@ export function QuranReader() {
 
   // Switching layout keeps the reader on the same page.
   useEffect(() => {
-    const id = window.setTimeout(() => goTo(pageRef.current), 30);
+    const id = window.setTimeout(() => goTo(pageRef.current, true), 50);
     return () => window.clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
