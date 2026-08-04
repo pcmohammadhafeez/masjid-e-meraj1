@@ -367,12 +367,16 @@ export function QuranReader() {
               key={p}
               className={cn(
                 "shrink-0",
-                mode === "swipe" ? "w-full snap-center snap-always" : "w-full pb-2",
+                mode === "swipe" ? "h-full w-full snap-center snap-always" : "w-full pb-2",
               )}
             >
               <div
                 className="mx-auto"
-                style={{ width: `${zoom * 100}%`, aspectRatio: String(ASPECT) }}
+                style={
+                  mode === "swipe"
+                    ? { width: `${zoom * 100}%`, height: "100%" }
+                    : { width: `${zoom * 100}%`, aspectRatio: String(ASPECT) }
+                }
               >
                 {visible && url ? (
                   <img
