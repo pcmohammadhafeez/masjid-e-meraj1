@@ -13,7 +13,7 @@ import {
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { Reveal, SectionHeading } from "@/components/site/Reveal";
-import { QuranViewer } from "@/components/site/QuranViewer";
+import { QuranReader } from "@/components/site/QuranReader";
 import { Announcements } from "@/components/site/Announcements";
 import { AboutSection } from "@/components/site/AboutSection";
 import { ContactSection } from "@/components/site/ContactSection";
@@ -70,7 +70,7 @@ function Resources() {
               description={t("res.desc")}
             />
             <Reveal className="mt-12">
-              <QuranViewer />
+              <QuranReader />
             </Reveal>
           </div>
         </section>

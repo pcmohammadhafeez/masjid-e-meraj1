@@ -134,6 +134,33 @@ export type Database = {
         }
         Relationships: []
       }
+      quran_pages: {
+        Row: {
+          bucket: string
+          ext: string
+          id: string
+          page_count: number
+          prefix: string
+          updated_at: string
+        }
+        Insert: {
+          bucket?: string
+          ext?: string
+          id?: string
+          page_count?: number
+          prefix?: string
+          updated_at?: string
+        }
+        Update: {
+          bucket?: string
+          ext?: string
+          id?: string
+          page_count?: number
+          prefix?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       quran_pdf: {
         Row: {
           id: string
