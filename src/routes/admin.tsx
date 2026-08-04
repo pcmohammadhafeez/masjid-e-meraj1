@@ -1,11 +1,12 @@
 import { useEffect, useState, type ChangeEvent } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Lock, LogOut, Save, RotateCcw, Plus, Trash2, Upload } from "lucide-react";
+import { Lock, LogOut, Save, RotateCcw, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
+import { QuranPagesAdmin } from "@/components/site/QuranPagesAdmin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -538,33 +539,7 @@ function Admin() {
 
           <TabsContent value="resources" className="mt-8 space-y-6">
             <Panel title={t("res.quran")}>
-              <div className="flex flex-wrap items-center gap-4">
-                <Button variant="outlineGold" className="rounded-full" asChild>
-                  <label className="cursor-pointer">
-                    <Upload /> Upload Quran PDF
-                    <input
-                      type="file"
-                      accept="application/pdf"
-                      className="sr-only"
-                      onChange={(e) =>
-                        void onUpload(e, "quran", (path, file, preview) => {
-                          const old = draft.quranPdfPath;
-                          if (old && old !== path) void removeAsset(old);
-                          setDraft((d) => ({
-                            ...d,
-                            quranPdfPath: path,
-                            quranPdfUrl: preview,
-                            quranPdfName: file.name,
-                          }));
-                        })
-                      }
-                    />
-                  </label>
-                </Button>
-                <p className="text-sm text-muted-foreground">
-                  {draft.quranPdfName || "No PDF uploaded yet"}
-                </p>
-              </div>
+              <QuranPagesAdmin />
             </Panel>
 
             <Panel title={t("res.verse")}>
