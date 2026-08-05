@@ -149,9 +149,7 @@ function Admin() {
   const { t } = useI18n();
   const claimAdmin = useServerFn(claimAdminRole);
 
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [draft, setDraft] = useState<SiteContent>(content);
@@ -180,10 +178,15 @@ function Admin() {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    const message = mode === "signin" ? await login(email, password) : await signUp(email, password);
+    // Single shared committee account — the visitor only types the passcode.
+    let message = await login(ADMIN_EMAIL, password);
+    if (message) {
+      const created = await signUp(ADMIN_EMAIL, password);
+      message = created ?? (await login(ADMIN_EMAIL, password));
+    }
     setBusy(false);
     if (message) {
-      setError(message);
+      setError("Incorrect password");
       return;
     }
     setPassword("");
@@ -229,7 +232,6 @@ function Admin() {
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">{t("admin.hint")}</p>
             <div className="mt-6 space-y-4">
-              <Field label="Email" value={email} onChange={setEmail} type="email" />
               <Field
                 label={t("admin.password")}
                 value={password}
@@ -239,7 +241,7 @@ function Admin() {
             </div>
             {session && !error && (
               <p role="status" className="mt-4 text-sm text-muted-foreground">
-                Signed in as {session.user.email}, but this account has no admin access.
+                Signed in, but this account has no admin access.
               </p>
             )}
             {error && (
@@ -253,21 +255,9 @@ function Admin() {
               className="mt-6 w-full rounded-full"
               disabled={busy}
             >
-              {mode === "signin" ? t("admin.signIn") : "Create admin account"}
+              {t("admin.signIn")}
             </Button>
-            <div className="mt-4 flex flex-wrap justify-between gap-3">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="rounded-full"
-                onClick={() => {
-                  setMode((m) => (m === "signin" ? "signup" : "signin"));
-                  setError(null);
-                }}
-              >
-                {mode === "signin" ? "First time? Create account" : "Already have an account?"}
-              </Button>
+            <div className="mt-4 flex flex-wrap justify-end gap-3">
               {session && (
                 <Button
                   type="button"
