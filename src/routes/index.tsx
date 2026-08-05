@@ -36,18 +36,18 @@ export const Route = createFileRoute("/")({
 function Index() {
   const { t } = useI18n();
   return (
-    <div className="min-h-screen gradient-sand">
+    <div className="min-h-screen bg-background">
       <Navbar transparent={false} />
-      <main className="page-enter">
+      <main>
         <PrayerTimes />
-        <section className="pb-10 sm:pb-16">
-          <div className="mx-auto max-w-5xl px-4 sm:px-8">
+        <section className="gradient-sand pb-8 sm:pb-12">
+          <div className="mx-auto max-w-3xl px-5 sm:px-8">
             <ReadQuranSection />
-            <div className="mt-4">
+            <div className="mt-5">
               <LocationSection />
             </div>
             <Reveal delay={120}>
-              <div className="mt-6 flex justify-center">
+              <div className="mt-5 flex justify-center">
                 <Button
                   variant="gold"
                   size="lg"
