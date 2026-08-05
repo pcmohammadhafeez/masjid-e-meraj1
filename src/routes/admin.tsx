@@ -135,6 +135,7 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
 }
 
 function Admin() {
+  const ADMIN_EMAIL = "committee@masjid-e-meraj.app";
   const {
     content,
     saveContent,
