@@ -191,6 +191,9 @@
     color: var(--color-foreground);
     font-family: var(--font-body);
     font-weight: 450;
+    transition:
+      background-color 0.5s ease,
+      color 0.5s ease;
     line-height: 1.65;
     letter-spacing: 0.005em;
     -webkit-font-smoothing: antialiased;
@@ -227,9 +230,9 @@
 }
 
 @utility glass-card {
-  background: color-mix(in oklab, var(--color-card) 82%, transparent);
-  backdrop-filter: blur(22px) saturate(150%);
-  border: 1px solid color-mix(in oklab, var(--color-gold) 30%, transparent);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  border: 1px solid var(--glass-border);
   box-shadow: var(--shadow-soft);
 }
 
