@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Sunrise,
   Sun,
@@ -8,7 +8,9 @@ import {
   Star,
   Clock,
   CalendarDays,
+  Timer,
 } from "lucide-react";
+
 import { Reveal } from "@/components/site/Reveal";
 import { useContent, type PrayerKey } from "@/lib/content";
 import { useI18n } from "@/lib/i18n";
@@ -20,12 +22,11 @@ const prayerMeta: {
   secondary?: boolean;
 }[] = [
   { key: "fajr", arabic: "الفجر", Icon: Moon },
+  { key: "sunrise", arabic: "الشروق", Icon: Sunrise, secondary: true },
   { key: "dhuhr", arabic: "الظهر", Icon: Sun },
   { key: "asr", arabic: "العصر", Icon: CloudSun },
   { key: "maghrib", arabic: "المغرب", Icon: Sunset },
   { key: "isha", arabic: "العشاء", Icon: Moon },
-  { key: "sunrise", arabic: "الشروق", Icon: Sunrise, secondary: true },
-  { key: "jumuah", arabic: "الجمعة", Icon: Star },
 ];
 
 function useNow() {
@@ -38,11 +39,12 @@ function useNow() {
   return now;
 }
 
-function formatClock(date: Date) {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  const h = date.getHours();
-  const h12 = h % 12 === 0 ? 12 : h % 12;
-  return `${pad(h12)}:${pad(date.getMinutes())}:${pad(date.getSeconds())} ${h >= 12 ? "PM" : "AM"}`;
+function pad(n: number) {
+  return String(n).padStart(2, "0");
+}
+
+function formatClock24(date: Date) {
+  return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
 }
 
 function formatHijri(date: Date) {
@@ -57,18 +59,13 @@ function formatHijri(date: Date) {
   }
 }
 
-/** Convert a stored "HH:MM" 24h value into Indian 12-hour parts. */
-function to12h(value: string): { time: string; suffix: string } {
+/** Normalise a stored value to strict 24-hour "HH:MM" (no AM/PM). */
+function to24h(value: string): string {
   const match = /^\s*(\d{1,2}):(\d{2})/.exec(value ?? "");
-  if (!match) return { time: value ?? "—", suffix: "" };
-  const hours = Number(match[1]);
-  const minutes = match[2];
-  const suffix = hours >= 12 ? "PM" : "AM";
-  const h12 = hours % 12 === 0 ? 12 : hours % 12;
-  return { time: `${String(h12).padStart(2, "0")}:${minutes}`, suffix };
+  if (!match) return "—";
+  return `${pad(Number(match[1]))}:${match[2]}`;
 }
 
-/** Minutes since midnight for a stored "HH:MM" value. */
 function toMinutes(value: string): number | null {
   const match = /^\s*(\d{1,2}):(\d{2})/.exec(value ?? "");
   if (!match) return null;
@@ -81,123 +78,76 @@ export function PrayerTimes() {
   const now = useNow();
 
   const locale = lang === "te" ? "te-IN" : lang === "ur" ? "ur-PK" : "en-GB";
-
-  // The next upcoming prayer (main prayers only, wraps to Fajr after Isha).
   const mainKeys: PrayerKey[] = ["fajr", "dhuhr", "asr", "maghrib", "isha"];
-  let nextKey: PrayerKey | null = null;
-  if (now) {
-    const nowMin = now.getHours() * 60 + now.getMinutes();
-    nextKey =
-      mainKeys.find((key) => {
-        const mins = toMinutes(content.prayerTimes[key]);
-        return mins !== null && mins > nowMin;
-      }) ?? "fajr";
-  }
+
+  const { nextKey, countdown } = useMemo(() => {
+    if (!now) return { nextKey: null as PrayerKey | null, countdown: "--:--:--" };
+    const secondsNow = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+    let next: PrayerKey = "fajr";
+    let target: number | null = null;
+    for (const key of mainKeys) {
+      const mins = toMinutes(content.prayerTimes[key]);
+      if (mins !== null && mins * 60 > secondsNow) {
+        next = key;
+        target = mins * 60;
+        break;
+      }
+    }
+    if (target === null) {
+      const fajr = toMinutes(content.prayerTimes.fajr);
+      target = fajr === null ? null : fajr * 60 + 86400;
+    }
+    if (target === null) return { nextKey: next, countdown: "--:--:--" };
+    const diff = Math.max(0, target - secondsNow);
+    const h = Math.floor(diff / 3600);
+    const m = Math.floor((diff % 3600) / 60);
+    const s = diff % 60;
+    return { nextKey: next, countdown: `${pad(h)}:${pad(m)}:${pad(s)}` };
+  }, [now, content.prayerTimes]);
 
   return (
     <section
       id="prayer-times"
-      className="particles scroll-mt-20 gradient-sand pb-6 pt-20 sm:pb-8 sm:pt-24"
+      className="aurora geo-pattern scroll-mt-24 px-4 pb-10 pt-24 sm:px-8 sm:pb-14 sm:pt-28"
     >
-      <div className="mx-auto max-w-3xl px-4 sm:px-8">
+      <div className="mx-auto max-w-5xl">
+        {/* Title + countdown */}
         <Reveal>
-          <div className="overflow-hidden rounded-[2rem] surface-card sm:rounded-[2.5rem]">
-            {/* Header */}
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gold/25 bg-secondary/40 px-5 py-4 sm:px-8">
-              <div className="flex min-w-0 items-center gap-3">
-                <span
-                  className="icon-chip grid h-9 w-9 shrink-0 place-items-center rounded-xl text-gold"
-                  aria-hidden="true"
-                >
-                  <Clock className="h-4 w-4" />
-                </span>
-                <h2 className="text-gold-shimmer min-w-0 truncate font-display text-xl font-bold tracking-tight sm:text-2xl">
+          <div className="glass-card page-enter rounded-[2rem] p-5 sm:rounded-[2.25rem] sm:p-7">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-gold">
+                  {t("prayer.eyebrow")}
+                </p>
+                <h1 className="mt-1.5 font-display text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
                   {t("prayer.title")}
-                </h2>
+                </h1>
               </div>
-              <span className="font-arabic text-lg text-foreground/85 sm:text-xl">أوقات الصلاة</span>
+              <p className="font-arabic text-2xl text-gold sm:text-3xl">أوقات الصلاة</p>
             </div>
 
-            {/* Compact timetable */}
-            <ul className="divide-y divide-gold/15">
-              {prayerMeta.map((prayer) => {
-                const isNext = nextKey === prayer.key;
-                return (
-                <li
-                  key={prayer.key}
-                  className={`flex items-center gap-3 px-5 transition-colors hover:bg-secondary/60 sm:px-8 ${
-                    prayer.secondary ? "bg-secondary/45 py-2" : "py-2.5"
-                  } ${isNext ? "next-prayer" : ""}`}
-                >
-                  <span
-                    className={`icon-chip grid shrink-0 place-items-center rounded-lg ${
-                      prayer.secondary
-                        ? "h-7 w-7 text-gold/80"
-                        : "h-8 w-8 text-gold"
-                    }`}
-                    aria-hidden="true"
-                  >
-                    <prayer.Icon className={prayer.secondary ? "h-3.5 w-3.5" : "h-4 w-4"} />
-                  </span>
-                  <span className="min-w-0">
-                    <span
-                      className={`block uppercase ${
-                        prayer.secondary
-                          ? "text-[0.7rem] font-medium tracking-[0.16em] text-muted-foreground"
-                          : "text-sm font-bold tracking-[0.14em] text-foreground"
-                      }`}
-                    >
-                      {t(`prayer.${prayer.key}`)}
-                    </span>
-                    {isNext && (
-                      <span className="mt-0.5 inline-block rounded-full border border-gold/50 bg-gold/15 px-2 py-px text-[0.55rem] font-bold uppercase tracking-[0.14em] text-gold">
-                        Next Prayer
-                      </span>
-                    )}
-                  </span>
-                  <span
-                    className={`font-arabic ${
-                      prayer.secondary
-                        ? "text-xs text-muted-foreground"
-                        : "text-sm text-foreground/70"
-                    }`}
-                  >
-                    {prayer.arabic}
-                  </span>
-                  <span className="mx-2 hidden h-px flex-1 bg-gold/20 sm:block" aria-hidden="true" />
-                  <span className="ms-auto min-w-[5.75rem] text-end sm:ms-0">
-                    <span
-                      className={`block font-display tabular-nums ${
-                        prayer.secondary
-                          ? "text-base font-semibold text-muted-foreground"
-                          : "text-2xl font-bold tracking-tight text-mint sm:text-[1.7rem]"
-                      }`}
-                    >
-                      {to12h(content.prayerTimes[prayer.key]).time}
-                      <span
-                        className={`ms-1 font-sans font-semibold tracking-wide ${
-                          prayer.secondary
-                            ? "text-[0.6rem] text-muted-foreground"
-                            : "text-[0.72rem] text-mint/85"
-                        }`}
-                      >
-                        {to12h(content.prayerTimes[prayer.key]).suffix}
-                      </span>
-                    </span>
-                    {prayer.key === "jumuah" && (
-                      <span className="block text-[0.68rem] font-medium text-muted-foreground">
-                        Khutbah {to12h(content.jumuahKhutbah).time}{" "}
-                        {to12h(content.jumuahKhutbah).suffix}
-                      </span>
-                    )}
-                  </span>
-                </li>
-                );
-              })}
-            </ul>
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              <div className="rounded-3xl border border-gold/30 bg-secondary/50 p-4 sm:p-5">
+                <p className="flex items-center gap-2 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                  <Timer className="h-3.5 w-3.5 text-gold" aria-hidden="true" />
+                  Next {nextKey ? t(`prayer.${nextKey}`) : ""} in
+                </p>
+                <p className="mt-1 font-display text-[2.5rem] font-extrabold leading-none tabular-nums text-primary sm:text-[2.75rem]">
+                  {countdown}
+                </p>
+              </div>
+              <div className="rounded-3xl border border-gold/30 bg-secondary/50 p-4 sm:p-5">
+                <p className="flex items-center gap-2 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                  <Clock className="h-3.5 w-3.5 text-gold" aria-hidden="true" />
+                  {t("prayer.clock")}
+                </p>
+                <p className="mt-1 font-display text-[2.5rem] font-extrabold leading-none tabular-nums text-foreground sm:text-[2.75rem]">
+                  {now ? formatClock24(now) : "--:--:--"}
+                </p>
+              </div>
+            </div>
 
-            {/* Date / Hijri / Clock strip */}
-            <div className="grid gap-3 border-t border-gold/25 bg-secondary/60 px-5 py-4 sm:grid-cols-3 sm:gap-4 sm:px-8">
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
               {[
                 {
                   Icon: CalendarDays,
@@ -212,24 +162,22 @@ export function PrayerTimes() {
                     : "—",
                 },
                 { Icon: Moon, label: t("prayer.hijri"), value: now ? formatHijri(now) : "—" },
-                {
-                  Icon: Clock,
-                  label: t("prayer.clock"),
-                  value: now ? formatClock(now) : "--:--:--",
-                },
               ].map(({ Icon, label, value }) => (
-                <div key={label} className="flex min-w-0 items-center gap-2.5">
+                <div
+                  key={label}
+                  className="flex min-w-0 items-center gap-3 rounded-3xl border border-border/70 bg-card/50 px-4 py-3"
+                >
                   <span
-                    className="icon-chip grid h-8 w-8 shrink-0 place-items-center rounded-xl text-gold"
+                    className="icon-chip grid h-9 w-9 shrink-0 place-items-center rounded-xl text-gold"
                     aria-hidden="true"
                   >
-                    <Icon className="h-3.5 w-3.5" />
+                    <Icon className="h-4 w-4" />
                   </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[0.68rem] font-medium uppercase tracking-[0.22em] text-muted-foreground">
+                  <div className="min-w-0">
+                    <p className="text-[0.64rem] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
                       {label}
                     </p>
-                    <p className="mt-0.5 break-words font-display text-[0.95rem] font-bold leading-snug tabular-nums text-foreground sm:text-base">
+                    <p className="mt-0.5 break-words font-display text-base font-bold leading-snug text-foreground">
                       {value}
                     </p>
                   </div>
@@ -238,6 +186,85 @@ export function PrayerTimes() {
             </div>
           </div>
         </Reveal>
+
+        {/* Big prayer tiles */}
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {prayerMeta.map((prayer, i) => {
+            const isNext = nextKey === prayer.key;
+            return (
+              <Reveal key={prayer.key} delay={i * 60}>
+                <div
+                  className={`prayer-tile h-full p-5 sm:p-6 ${isNext ? "prayer-tile-active" : ""}`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <span
+                      className="icon-chip grid h-11 w-11 shrink-0 place-items-center rounded-2xl text-gold"
+                      aria-hidden="true"
+                    >
+                      <prayer.Icon className="h-5 w-5" strokeWidth={1.6} />
+                    </span>
+                    {isNext ? (
+                      <span className="rounded-full border border-gold/60 bg-gold/15 px-2.5 py-1 text-[0.6rem] font-bold uppercase tracking-[0.16em] text-gold">
+                        Next
+                      </span>
+                    ) : prayer.secondary ? (
+                      <span className="rounded-full border border-border px-2.5 py-1 text-[0.6rem] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+                        Info
+                      </span>
+                    ) : null}
+                  </div>
+
+                  <div className="mt-4 flex items-baseline justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-bold uppercase tracking-[0.18em] text-foreground">
+                        {t(`prayer.${prayer.key}`)}
+                      </p>
+                      <p className="mt-1 font-arabic text-xl leading-none text-gold">
+                        {prayer.arabic}
+                      </p>
+                    </div>
+                  </div>
+
+                  <p
+                    className={`mt-4 font-display text-[2.6rem] font-extrabold leading-none tracking-tight tabular-nums sm:text-[2.75rem] ${
+                      prayer.secondary ? "text-muted-foreground" : "text-mint"
+                    }`}
+                  >
+                    {to24h(content.prayerTimes[prayer.key])}
+                  </p>
+                </div>
+              </Reveal>
+            );
+          })}
+
+          {/* Jumu'ah — full width */}
+          <Reveal delay={360} className="sm:col-span-2 lg:col-span-3">
+            <div className="prayer-tile flex flex-wrap items-center justify-between gap-5 p-5 sm:p-6">
+              <div className="flex min-w-0 items-center gap-4">
+                <span
+                  className="icon-chip grid h-11 w-11 shrink-0 place-items-center rounded-2xl text-gold"
+                  aria-hidden="true"
+                >
+                  <Star className="h-5 w-5" strokeWidth={1.6} />
+                </span>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-bold uppercase tracking-[0.18em] text-foreground">
+                    {t("prayer.jumuah")}
+                  </p>
+                  <p className="mt-1 font-arabic text-xl leading-none text-gold">الجمعة</p>
+                </div>
+              </div>
+              <div className="text-end">
+                <p className="font-display text-[2.6rem] font-extrabold leading-none tracking-tight tabular-nums text-mint sm:text-[2.75rem]">
+                  {to24h(content.prayerTimes.jumuah)}
+                </p>
+                <p className="mt-1 text-xs font-semibold text-muted-foreground">
+                  Khutbah {to24h(content.jumuahKhutbah)}
+                </p>
+              </div>
+            </div>
+          </Reveal>
+        </div>
       </div>
     </section>
   );
