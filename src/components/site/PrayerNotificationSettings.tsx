@@ -251,37 +251,46 @@ export function PrayerNotificationSettings({
               </div>
 
               <button
-                type="button"
-                onClick={togglePrayer}
-                role="switch"
-                aria-checked={isEnabled}
-                className={`
-                  relative h-7 w-12
-                  rounded-full
-                  transition-all duration-300
-                  ${
-                    isEnabled
-                      ? "bg-gold"
-                      : "bg-muted"
-                  }
-                `}
-              >
-                <span
-                  className={`
-                    absolute top-1
-                    h-5 w-5
-                    rounded-full
-                    bg-white
-                    shadow-sm
-                    transition-transform duration-300
-                    ${
-                      isEnabled
-                        ? "translate-x-6"
-                        : "translate-x-1"
-                    }
-                  `}
-                />
-              </button>
+  type="button"
+  onClick={togglePrayer}
+  role="switch"
+  aria-checked={isEnabled}
+  className={`
+    relative
+    h-7
+    w-12
+    shrink-0
+    overflow-hidden
+    rounded-full
+    transition-all
+    duration-300
+    ${
+      isEnabled
+        ? "bg-gold"
+        : "bg-muted"
+    }
+  `}
+>
+  <span
+    className={`
+      absolute
+      top-1
+      left-1
+      h-5
+      w-5
+      rounded-full
+      bg-white
+      shadow-sm
+      transition-[left]
+      duration-300
+      ${
+        isEnabled
+          ? "left-6"
+          : "left-1"
+      }
+    `}
+  />
+</button>
             </div>
 
             {/* Minutes */}
