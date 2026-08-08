@@ -336,11 +336,14 @@ function Admin() {
     const normalizedPrayerTimes = Object.fromEntries(
       Object.entries(draft.prayerTimes).map(([key, value]) => [
         key,
-        normalizePrayerTime(value),
+        normalizePrayerTime(value, key as PrayerKey),
       ]),
     ) as SiteContent["prayerTimes"];
 
-    const normalizedKhutbah = normalizePrayerTime(draft.jumuahKhutbah);
+    const normalizedKhutbah = normalizePrayerTime(
+  draft.jumuahKhutbah,
+  "jumuahKhutbah",
+);
 
     const nextDraft: SiteContent = {
       ...draft,
