@@ -44,12 +44,14 @@ export default async function handler(
       minutesBefore = 5,
     } = req.body ?? {};
 
-    const { data: subscriptions, error } =
-      await supabase
-        .from("push_subscriptions")
-        .select(
-          "id, endpoint, p256dh, auth",
-        );
+    const {
+      data: subscriptions,
+      error,
+    } = await supabase
+      .from("push_subscriptions")
+      .select(
+        "id, endpoint, p256dh, auth",
+      );
 
     if (error) {
       console.error(
@@ -59,6 +61,9 @@ export default async function handler(
 
       return res.status(500).json({
         error: "Failed to load subscriptions",
+        details: error.message,
+        code: error.code,
+        hint: error.hint,
       });
     }
 
@@ -66,7 +71,9 @@ export default async function handler(
       return res.status(200).json({
         success: true,
         sent: 0,
-        message: "No subscriptions found",
+        removed: 0,
+        message:
+          "No subscriptions found",
       });
     }
 
@@ -75,7 +82,9 @@ export default async function handler(
       body: `${prayer} prayer is in ${minutesBefore} minutes.`,
       icon: "/masjid-icon.svg",
       badge: "/masjid-icon.svg",
-      tag: `masjid-${String(prayer).toLowerCase()}`,
+      tag: `masjid-${String(
+        prayer,
+      ).toLowerCase()}`,
       url: "/",
     });
 
@@ -108,12 +117,18 @@ export default async function handler(
           error?.statusCode === 404 ||
           error?.statusCode === 410
         ) {
-          await supabase
-            .from("push_subscriptions")
-            .delete()
-            .eq("id", subscription.id);
+          const { error: deleteError } =
+            await supabase
+              .from("push_subscriptions")
+              .delete()
+              .eq(
+                "id",
+                subscription.id,
+              );
 
-          removed++;
+          if (!deleteError) {
+            removed++;
+          }
         }
       }
     }
@@ -123,7 +138,7 @@ export default async function handler(
       sent,
       removed,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error(
       "Push sender error:",
       error,
@@ -131,6 +146,9 @@ export default async function handler(
 
     return res.status(500).json({
       error: "Internal server error",
+      details:
+        error?.message ??
+        "Unknown server error",
     });
   }
 }
