@@ -133,45 +133,80 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
     </section>
   );
 }
-function normalizePrayerTime(value: string): string {
-  const input = value.trim().toUpperCase();
+function normalizePrayerTime(
+  value: string,
+  key: PrayerKey | "jumuahKhutbah",
+): string {
+  const input = value.trim();
 
-  // Already in 24-hour HH:MM format
-  const twentyFourHour = /^([01]?\d|2[0-3]):([0-5]\d)$/.exec(input);
+  const match = /^(\d{1,2}):([0-5]\d)$/.exec(input);
 
-  if (twentyFourHour) {
-    const hour = Number(twentyFourHour[1]);
-    const minute = twentyFourHour[2];
-
-    return `${String(hour).padStart(2, "0")}:${minute}`;
+  if (!match) {
+    throw new Error(
+      `Invalid time "${value}". Enter only time like 5:02 or 1:30.`,
+    );
   }
 
-  // 12-hour format such as:
-  // 5:02 AM
-  // 1:05 PM
-  // 12:30 PM
-  const twelveHour =
-    /^(1[0-2]|0?[1-9]):([0-5]\d)\s*(AM|PM)$/.exec(input);
+  let hour = Number(match[1]);
+  const minute = match[2];
 
-  if (twelveHour) {
-    let hour = Number(twelveHour[1]);
-    const minute = twelveHour[2];
-    const period = twelveHour[3];
+  if (hour < 1 || hour > 12) {
+    throw new Error(
+      `Invalid time "${value}". Enter an hour from 1 to 12.`,
+    );
+  }
+function normalizePrayerTime(
+  value: string,
+  key: PrayerKey | "jumuahKhutbah",
+): string {
+  const input = value.trim();
 
-    if (period === "AM" && hour === 12) {
+  const match = /^(\d{1,2}):([0-5]\d)$/.exec(input);
+
+  if (!match) {
+    throw new Error(
+      `Invalid time "${value}". Enter only time like 5:02 or 1:30.`,
+    );
+  }
+
+  let hour = Number(match[1]);
+  const minute = match[2];
+
+  if (hour < 1 || hour > 12) {
+    throw new Error(
+      `Invalid time "${value}". Enter an hour from 1 to 12.`,
+    );
+  }
+
+  const isMorning = key === "fajr" || key === "sunrise";
+
+  if (isMorning) {
+    if (hour === 12) {
       hour = 0;
     }
-
-    if (period === "PM" && hour !== 12) {
+  } else {
+    if (hour !== 12) {
       hour += 12;
     }
-
-    return `${String(hour).padStart(2, "0")}:${minute}`;
   }
 
-  throw new Error(
-    `Invalid prayer time "${value}". Please use a format such as 5:02 AM or 1:05 PM.`,
-  );
+  return `${String(hour).padStart(2, "0")}:${minute}`;
+}
+
+
+  const isMorning = key === "fajr" || key === "sunrise";
+
+  if (isMorning) {
+    if (hour === 12) {
+      hour = 0;
+    }
+  } else {
+    if (hour !== 12) {
+      hour += 12;
+    }
+  }
+
+  return `${String(hour).padStart(2, "0")}:${minute}`;
 }
 function Admin() {
   const ADMIN_EMAIL = "committee@masjid-e-meraj.app";
