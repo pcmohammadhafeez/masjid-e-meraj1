@@ -610,6 +610,12 @@
     animation: none;
     transition: none;
   }
+  .icon-breathe,
+  .icon-spin-slow,
+  .icon-soft-pulse,
+  .icon-ring {
+    animation: none;
+  }
   .btn-quran,
   .btn-quran::after {
     animation: none;
