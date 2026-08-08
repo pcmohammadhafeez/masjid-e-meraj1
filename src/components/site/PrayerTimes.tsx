@@ -86,10 +86,10 @@ function formatHijri(date: Date) {
 }
 
 /** Convert stored HH:MM into readable 12-hour time. */
-function to12h(value: string): {
-  time: string;
-  suffix: string;
-} {
+function to12h(
+  value: string,
+  key?: PrayerKey,
+): { time: string; suffix: string } {
   const match = /^\s*(\d{1,2}):(\d{2})/.exec(value ?? "");
 
   if (!match) {
@@ -99,8 +99,20 @@ function to12h(value: string): {
     };
   }
 
-  const hours = Number(match[1]);
+  let hours = Number(match[1]);
   const minutes = match[2];
+
+  // Admin allows entering only H:MM.
+  // Fajr and Sunrise are AM.
+  // Dhuhr, Asr, Maghrib, Isha and Jumu'ah are PM.
+  if (hours >= 1 && hours <= 11) {
+    if (
+      key !== "fajr" &&
+      key !== "sunrise"
+    ) {
+      hours += 12;
+    }
+  }
 
   const suffix = hours >= 12 ? "PM" : "AM";
   const h12 = hours % 12 === 0 ? 12 : hours % 12;
@@ -112,12 +124,45 @@ function to12h(value: string): {
 }
 
 /** Convert stored HH:MM into minutes since midnight. */
-function toMinutes(value: string): number | null {
-  const match = /^\s*(\d{1,2}):(\d{2})/.exec(value ?? "");
+function toMinutes(
+  value: string,
+  key?: PrayerKey,
+): number | null {
+  const match =
+    /^\s*(\d{1,2}):(\d{2})/.exec(value ?? "");
 
-  if (!match) return null;
+  if (!match) {
+    return null;
+  }
 
-  return Number(match[1]) * 60 + Number(match[2]);
+  let hours = Number(match[1]);
+  const minutes = Number(match[2]);
+
+  if (
+    hours < 1 ||
+    hours > 12 ||
+    minutes < 0 ||
+    minutes > 59
+  ) {
+    return null;
+  }
+
+  // Fajr and Sunrise are AM.
+  // All main prayers after Fajr are PM.
+  if (
+    hours >= 1 &&
+    hours <= 11 &&
+    key !== "fajr" &&
+    key !== "sunrise"
+  ) {
+    hours += 12;
+  }
+
+  if (hours === 12 && key === "fajr") {
+    hours = 0;
+  }
+
+  return hours * 60 + minutes;
 }
 
 function PrayerLoadingSkeleton() {
@@ -226,7 +271,7 @@ export function PrayerTimes() {
     const upcoming = mainKeys
       .map((key) => ({
         key,
-        minutes: toMinutes(content.prayerTimes[key]),
+        minutes: toMinutes(content.prayerTimes[key], key),
       }))
       .filter(
         (
@@ -285,8 +330,9 @@ export function PrayerTimes() {
                 const isNext = nextKey === prayer.key;
 
                 const displayTime = to12h(
-                  content.prayerTimes[prayer.key],
-                );
+  content.prayerTimes[prayer.key],
+  prayer.key,
+);
 
                 return (
                   <li
