@@ -57,11 +57,28 @@ function formatClock(date: Date) {
 
 function formatHijri(date: Date) {
   try {
-    return new Intl.DateTimeFormat("en-u-ca-islamic", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    }).format(date);
+    const formatter = new Intl.DateTimeFormat(
+      "en-IN-u-ca-islamic-umalqura",
+      {
+        timeZone: "Asia/Kolkata",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      },
+    );
+
+    const parts = formatter.formatToParts(date);
+
+    const day =
+      parts.find((part) => part.type === "day")?.value ?? "";
+
+    const month =
+      parts.find((part) => part.type === "month")?.value ?? "";
+
+    const year =
+      parts.find((part) => part.type === "year")?.value ?? "";
+
+    return `${day} ${month} ${year} AH`;
   } catch {
     return "—";
   }
