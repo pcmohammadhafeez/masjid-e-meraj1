@@ -134,10 +134,18 @@ export function PrayerTimes() {
                       prayer.secondary
                         ? "h-7 w-7 text-gold/80"
                         : "h-8 w-8 text-gold"
-                    }`}
+                    } ${isNext ? "icon-ring" : ""}`}
                     aria-hidden="true"
                   >
-                    <prayer.Icon className={prayer.secondary ? "h-3.5 w-3.5" : "h-4 w-4"} />
+                    <prayer.Icon
+                      className={`${prayer.secondary ? "h-3.5 w-3.5" : "h-4 w-4"} ${
+                        prayer.Icon === Moon
+                          ? "icon-breathe"
+                          : prayer.Icon === Sun || prayer.Icon === Sunrise
+                            ? "icon-spin-slow"
+                            : "icon-soft-pulse"
+                      }`}
+                    />
                   </span>
                   <span className="min-w-0">
                     <span
@@ -167,10 +175,10 @@ export function PrayerTimes() {
                   <span className="mx-2 hidden h-px flex-1 bg-gold/20 sm:block" aria-hidden="true" />
                   <span className="ms-auto min-w-[5.75rem] text-end sm:ms-0">
                     <span
-                      className={`block font-display tabular-nums ${
+                      className={`font-clock block ${
                         prayer.secondary
-                          ? "text-base font-semibold text-muted-foreground"
-                          : "text-2xl font-bold tracking-tight text-mint sm:text-[1.7rem]"
+                          ? "text-lg text-muted-foreground"
+                          : "text-[1.7rem] text-mint sm:text-[1.9rem]"
                       }`}
                     >
                       {to12h(content.prayerTimes[prayer.key]).time}
@@ -223,13 +231,13 @@ export function PrayerTimes() {
                     className="icon-chip grid h-8 w-8 shrink-0 place-items-center rounded-xl text-gold"
                     aria-hidden="true"
                   >
-                    <Icon className="h-3.5 w-3.5" />
+                    <Icon className={`h-3.5 w-3.5 ${Icon === Moon ? "icon-breathe" : "icon-soft-pulse"}`} />
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="text-[0.68rem] font-medium uppercase tracking-[0.22em] text-muted-foreground">
                       {label}
                     </p>
-                    <p className="mt-0.5 break-words font-display text-[0.95rem] font-bold leading-snug tabular-nums text-foreground sm:text-base">
+                    <p className="font-clock mt-0.5 break-words text-[0.95rem] leading-snug text-foreground sm:text-base">
                       {value}
                     </p>
                   </div>
