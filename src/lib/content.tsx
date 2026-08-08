@@ -96,9 +96,9 @@ const basics: BasicTopic[] = [
       ur: "اسلام کے پانچ ارکان",
     },
     body: {
-      en: "Shahadah (faith), Salah (prayer), Zakat (charity), Sawm (fasting in Ramadan) and Hajj (pilgrimage).",
-      te: "షహాదా (విశ్వాసం), నమాజ్, జకాత్ (దానం), రోజా (ఉపవాసం) మరియు హజ్ (యాత్ర).",
-      ur: "شہادت، نماز، زکوٰۃ، روزہ اور حج۔",
+      en: "The Five Pillars are the foundation of a Muslim's life.\n• Shahadah – Testifying that there is no deity worthy of worship except Allah and Muhammad ﷺ is His Messenger.\n• Salah – Performing the five daily prayers at their prescribed times.\n• Zakat – Giving 2.5% of eligible savings annually to those who qualify.\n• Sawm – Fasting during the month of Ramadan from dawn until sunset.\n• Hajj – Pilgrimage to Makkah once in a lifetime for every Muslim who is physically and financially able.",
+      te: "ఐదు మూల స్తంభాలు ముస్లిం జీవితానికి పునాది.\n• షహాదా – అల్లాహ్ తప్ప ఆరాధనకు అర్హుడైన దైవం లేడని, ముహమ్మద్ ﷺ ఆయన ప్రవక్త అని సాక్ష్యం ఇవ్వడం.\n• నమాజ్ – ఐదు పూటల నమాజులను నిర్ణీత సమయాల్లో నిర్వర్తించడం.\n• జకాత్ – అర్హత గల పొదుపులో 2.5% ప్రతి సంవత్సరం అర్హులకు ఇవ్వడం.\n• రోజా – రమదాన్ మాసంలో ఉదయం నుండి సూర్యాస్తమయం వరకు ఉపవాసం ఉండటం.\n• హజ్ – శారీరకంగా, ఆర్థికంగా శక్తి ఉన్న ప్రతి ముస్లిం జీవితంలో ఒకసారి మక్కా యాత్ర చేయడం.",
+      ur: "پانچ ارکان مسلمان کی زندگی کی بنیاد ہیں۔\n• شہادت – گواہی دینا کہ اللہ کے سوا کوئی عبادت کے لائق نہیں اور محمد ﷺ اُس کے رسول ہیں۔\n• نماز – پانچ وقت کی نمازیں اپنے مقررہ اوقات میں ادا کرنا۔\n• زکوٰۃ – سالانہ قابلِ زکوٰۃ بچت کا 2.5 فیصد مستحقین کو دینا۔\n• روزہ – ماہِ رمضان میں صبح صادق سے غروبِ آفتاب تک روزہ رکھنا۔\n• حج – ہر صاحبِ استطاعت مسلمان پر زندگی میں ایک بار مکہ کا حج۔",
     },
   },
   {
@@ -110,9 +110,9 @@ const basics: BasicTopic[] = [
       ur: "ایمان کے چھ ارکان",
     },
     body: {
-      en: "Belief in Allah, His angels, His books, His messengers, the Last Day and divine decree.",
-      te: "అల్లాహ్, దైవదూతలు, గ్రంథాలు, ప్రవక్తలు, తీర్పు దినం మరియు దైవ నిర్ణయంపై విశ్వాసం.",
-      ur: "اللہ، فرشتوں، کتابوں، رسولوں، آخرت اور تقدیر پر ایمان۔",
+      en: "A Muslim believes in:\n• Allah\n• His Angels\n• His Revealed Books\n• His Messengers\n• The Last Day\n• Divine Decree (Qadr), both good and bad, by Allah's wisdom.",
+      te: "ఒక ముస్లిం వీటిపై విశ్వసిస్తాడు:\n• అల్లాహ్\n• ఆయన దైవదూతలు\n• ఆయన అవతరించిన గ్రంథాలు\n• ఆయన ప్రవక్తలు\n• తీర్పు దినం\n• దైవ నిర్ణయం (ఖద్ర్) — మేలు అయినా, కీడు అయినా అల్లాహ్ వివేకంతోనే.",
+      ur: "مسلمان ان پر ایمان رکھتا ہے:\n• اللہ\n• اُس کے فرشتے\n• اُس کی نازل کردہ کتابیں\n• اُس کے رسول\n• روزِ آخرت\n• تقدیر (قدر) — اچھی ہو یا بری، اللہ کی حکمت سے۔",
     },
   },
   {
@@ -120,9 +120,9 @@ const basics: BasicTopic[] = [
     icon: "wudu",
     title: { en: "How to Perform Wudu", te: "వుజూ ఎలా చేయాలి", ur: "وضو کیسے کریں" },
     body: {
-      en: "Wash the hands, rinse the mouth and nose, wash the face and arms, wipe the head, then wash the feet.",
-      te: "చేతులు, నోరు, ముక్కు కడిగి, ముఖం మరియు చేతులు కడిగి, తలపై తుడిచి, పాదాలు కడగాలి.",
-      ur: "ہاتھ دھوئیں، کلی کریں، ناک صاف کریں، چہرہ اور بازو دھوئیں، سر کا مسح کریں، پھر پاؤں دھوئیں۔",
+      en: "1. Make the intention.\n2. Say Bismillah.\n3. Wash both hands three times.\n4. Rinse the mouth three times.\n5. Clean the nose three times.\n6. Wash the face three times.\n7. Wash the right arm including the elbow three times.\n8. Wash the left arm including the elbow three times.\n9. Wipe the head once.\n10. Wipe both ears.\n11. Wash the right foot including the ankle three times.\n12. Wash the left foot including the ankle three times.",
+      te: "1. సంకల్పం చేయండి.\n2. బిస్మిల్లాహ్ పలకండి.\n3. రెండు చేతులు మూడు సార్లు కడగండి.\n4. మూడు సార్లు పుక్కిలించండి.\n5. మూడు సార్లు ముక్కు శుభ్రం చేయండి.\n6. ముఖం మూడు సార్లు కడగండి.\n7. కుడి చేతిని మోచేయి వరకు మూడు సార్లు కడగండి.\n8. ఎడమ చేతిని మోచేయి వరకు మూడు సార్లు కడగండి.\n9. తలపై ఒకసారి తుడవండి.\n10. రెండు చెవులను తుడవండి.\n11. కుడి పాదాన్ని చీలమండ వరకు మూడు సార్లు కడగండి.\n12. ఎడమ పాదాన్ని చీలమండ వరకు మూడు సార్లు కడగండి.",
+      ur: "1. نیت کریں۔\n2. بسم اللہ کہیں۔\n3. دونوں ہاتھ تین بار دھوئیں۔\n4. تین بار کلی کریں۔\n5. تین بار ناک صاف کریں۔\n6. چہرہ تین بار دھوئیں۔\n7. دایاں بازو کہنی سمیت تین بار دھوئیں۔\n8. بایاں بازو کہنی سمیت تین بار دھوئیں۔\n9. سر کا ایک بار مسح کریں۔\n10. دونوں کانوں کا مسح کریں۔\n11. دایاں پاؤں ٹخنے سمیت تین بار دھوئیں۔\n12. بایاں پاؤں ٹخنے سمیت تین بار دھوئیں۔",
     },
   },
   {
@@ -130,9 +130,9 @@ const basics: BasicTopic[] = [
     icon: "salah",
     title: { en: "How to Pray Salah", te: "నమాజ్ ఎలా చేయాలి", ur: "نماز کیسے پڑھیں" },
     body: {
-      en: "Face the Qiblah, make the intention, then pray with takbir, recitation, ruku, sujud and tasleem.",
-      te: "ఖిబ్లా వైపు తిరిగి, సంకల్పం చేసి, తక్బీర్, ఖిరాఅత్, రుకూ, సజ్దా మరియు సలామ్‌తో నమాజ్ చేయండి.",
-      ur: "قبلہ رُخ ہو کر نیت کریں، پھر تکبیر، قراءت، رکوع، سجدہ اور سلام کے ساتھ نماز ادا کریں۔",
+      en: "1. Perform Wudu.\n2. Face the Qiblah.\n3. Make the intention.\n4. Say Takbir.\n5. Recite Surah Al-Fatihah.\n6. Recite another Surah.\n7. Perform Ruku.\n8. Stand upright.\n9. Perform the first Sujud.\n10. Sit briefly.\n11. Perform the second Sujud.\n12. Continue the remaining Rak'ahs.\n13. Recite Tashahhud.\n14. Send blessings upon Prophet Muhammad ﷺ.\n15. End the prayer with Tasleem.",
+      te: "1. వుజూ చేయండి.\n2. ఖిబ్లా వైపు తిరగండి.\n3. సంకల్పం చేయండి.\n4. తక్బీర్ పలకండి.\n5. సూరహ్ అల్-ఫాతిహా పఠించండి.\n6. మరొక సూరహ్ పఠించండి.\n7. రుకూ చేయండి.\n8. నిటారుగా నిలబడండి.\n9. మొదటి సజ్దా చేయండి.\n10. కొద్దిసేపు కూర్చోండి.\n11. రెండవ సజ్దా చేయండి.\n12. మిగిలిన రకాతులను కొనసాగించండి.\n13. తషహ్హుద్ పఠించండి.\n14. ప్రవక్త ముహమ్మద్ ﷺ పై దరూద్ పంపండి.\n15. సలామ్‌తో నమాజ్ ముగించండి.",
+      ur: "1. وضو کریں۔\n2. قبلہ رُخ ہوں۔\n3. نیت کریں۔\n4. تکبیر کہیں۔\n5. سورۃ الفاتحہ پڑھیں۔\n6. کوئی دوسری سورت پڑھیں۔\n7. رکوع کریں۔\n8. سیدھے کھڑے ہوں۔\n9. پہلا سجدہ کریں۔\n10. مختصر بیٹھیں۔\n11. دوسرا سجدہ کریں۔\n12. باقی رکعتیں اسی طرح پوری کریں۔\n13. تشہد پڑھیں۔\n14. نبی کریم ﷺ پر درود بھیجیں۔\n15. سلام کے ساتھ نماز مکمل کریں۔",
     },
   },
   {
@@ -140,9 +140,9 @@ const basics: BasicTopic[] = [
     icon: "ramadan",
     title: { en: "Ramadan", te: "రమదాన్", ur: "رمضان" },
     body: {
-      en: "The blessed month of fasting, night prayers, Quran recitation and generosity to those in need.",
-      te: "ఉపవాసం, తరావీహ్, ఖురాన్ పఠనం మరియు దానధర్మాల శుభ మాసం.",
-      ur: "روزے، تراویح، تلاوتِ قرآن اور سخاوت کا مبارک مہینہ۔",
+      en: "Ramadan is the ninth month of the Islamic calendar.\nDuring Ramadan Muslims:\n• Fast from dawn until sunset.\n• Increase Quran recitation.\n• Perform Taraweeh prayers.\n• Make abundant Dua.\n• Give charity.\n• Seek Laylatul Qadr.\n• Increase good deeds.\n• Break the fast following the Sunnah.",
+      te: "రమదాన్ ఇస్లామీ కేలండర్‌లో తొమ్మిదవ మాసం.\nరమదాన్‌లో ముస్లిములు:\n• ఉదయం నుండి సూర్యాస్తమయం వరకు ఉపవాసం ఉంటారు.\n• ఖురాన్ పఠనం పెంచుతారు.\n• తరావీహ్ నమాజ్ చేస్తారు.\n• అధికంగా దుఆ చేస్తారు.\n• దానధర్మాలు చేస్తారు.\n• లైలతుల్ ఖద్ర్ కోరుకుంటారు.\n• సత్కార్యాలు పెంచుతారు.\n• సున్నత్ ప్రకారం ఉపవాసం విరమిస్తారు.",
+      ur: "رمضان اسلامی کیلنڈر کا نواں مہینہ ہے۔\nرمضان میں مسلمان:\n• صبح صادق سے غروبِ آفتاب تک روزہ رکھتے ہیں۔\n• تلاوتِ قرآن بڑھاتے ہیں۔\n• تراویح ادا کرتے ہیں۔\n• کثرت سے دعا کرتے ہیں۔\n• صدقہ و خیرات کرتے ہیں۔\n• لیلۃ القدر کی تلاش کرتے ہیں۔\n• نیک اعمال میں اضافہ کرتے ہیں۔\n• سنت کے مطابق روزہ افطار کرتے ہیں۔",
     },
   },
   {
@@ -150,9 +150,9 @@ const basics: BasicTopic[] = [
     icon: "zakat",
     title: { en: "Zakat", te: "జకాత్", ur: "زکوٰۃ" },
     body: {
-      en: "An annual purification of wealth — 2.5% of savings given to the poor and those in need.",
-      te: "సంపద శుద్ధి — పొదుపులో 2.5% పేదలకు ఇవ్వడం.",
-      ur: "مال کی سالانہ پاکیزگی — بچت کا 2.5 فیصد مستحقین کو دینا۔",
+      en: "Zakat is an obligatory act of worship for Muslims whose wealth reaches the Nisab.\nIt purifies wealth and supports those who are eligible.\nGenerally, 2.5% of qualifying savings is given annually.\nEligible recipients include the poor, needy and others mentioned in the Quran.",
+      te: "నిసాబ్ చేరిన సంపద ఉన్న ముస్లిములపై జకాత్ తప్పనిసరి ఆరాధన.\nఇది సంపదను పరిశుద్ధం చేస్తుంది మరియు అర్హులకు తోడ్పడుతుంది.\nసాధారణంగా అర్హత గల పొదుపులో 2.5% ప్రతి సంవత్సరం ఇవ్వబడుతుంది.\nఅర్హులలో పేదలు, నిరుపేదలు మరియు ఖురాన్‌లో పేర్కొన్న ఇతరులు ఉంటారు.",
+      ur: "زکوٰۃ اُن مسلمانوں پر فرض عبادت ہے جن کا مال نصاب کو پہنچ جائے۔\nیہ مال کو پاک کرتی ہے اور مستحقین کی مدد کرتی ہے۔\nعام طور پر قابلِ زکوٰۃ بچت کا 2.5 فیصد سالانہ دیا جاتا ہے۔\nمستحقین میں فقراء، مساکین اور قرآن میں مذکور دیگر افراد شامل ہیں۔",
     },
   },
   {
@@ -160,9 +160,9 @@ const basics: BasicTopic[] = [
     icon: "hajj",
     title: { en: "Hajj", te: "హజ్", ur: "حج" },
     body: {
-      en: "The pilgrimage to Makkah, obligatory once in a lifetime for those who are able.",
-      te: "శక్తి ఉన్నవారికి జీవితంలో ఒకసారి తప్పనిసరి అయిన మక్కా యాత్ర.",
-      ur: "مکہ کا سفر، صاحبِ استطاعت پر زندگی میں ایک بار فرض۔",
+      en: "Hajj is one of the Five Pillars of Islam.\nIt is obligatory once in a lifetime for Muslims who are physically and financially able.\nMajor rites include:\n• Ihram\n• Tawaf\n• Sa'i\n• Standing at Arafah\n• Muzdalifah\n• Stoning the Jamarat\n• Sacrifice (where applicable)\n• Farewell Tawaf",
+      te: "హజ్ ఇస్లాం ఐదు మూల స్తంభాలలో ఒకటి.\nశారీరకంగా, ఆర్థికంగా శక్తి ఉన్న ముస్లిములకు జీవితంలో ఒకసారి తప్పనిసరి.\nప్రధాన ఆచారాలు:\n• ఇహ్రామ్\n• తవాఫ్\n• సఈ\n• అరఫాలో నిలబడటం\n• ముజ్‌దలిఫా\n• జమరాత్‌పై రాళ్ళు వేయడం\n• ఖుర్బానీ (వర్తించే చోట)\n• వీడ్కోలు తవాఫ్",
+      ur: "حج اسلام کے پانچ ارکان میں سے ایک ہے۔\nیہ ہر صاحبِ استطاعت مسلمان پر زندگی میں ایک بار فرض ہے۔\nاہم ارکان:\n• احرام\n• طواف\n• سعی\n• وقوفِ عرفہ\n• مزدلفہ\n• رمی جمرات\n• قربانی (جہاں لازم ہو)\n• طوافِ وداع",
     },
   },
 ];
