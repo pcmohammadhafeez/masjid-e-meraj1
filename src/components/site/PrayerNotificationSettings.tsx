@@ -260,34 +260,66 @@ export function PrayerNotificationSettings({
   ----------------------------------------------------- */
 
   useEffect(() => {
-    if (!isEnabled) {
-      return;
-    }
+  if (!isEnabled) {
+    return;
+  }
 
-    if (
-      !("Notification" in window) ||
-      Notification.permission !== "granted"
-    ) {
-      return;
-    }
+  if (
+    !("Notification" in window) ||
+    Notification.permission !== "granted"
+  ) {
+    return;
+  }
+
+  const prayerDate = prayerTimeToDate(
+    prayerKey,
+    prayerTime,
+  );
+
+  if (!prayerDate) {
+    return;
+  }
+
+  const now = new Date();
+
+  /*
+   * Notification time =
+   * prayer time - selected minutes
+   */
+  const notificationTime =
+    prayerDate.getTime() -
+    settings.minutesBefore * 60 * 1000;
+
+  const delay =
+    notificationTime - now.getTime();
+
+  /*
+   * Don't schedule a notification that has
+   * already passed today.
+   */
+  if (delay <= 0) {
+    return;
+  }
+
+  const timer = window.setTimeout(() => {
+    showPrayerNotification(prayerLabel);
 
     /*
-     * Get the prayer time from the page.
-     *
-     * PrayerTimes.tsx does not pass the actual
-     * prayer time to this component, so we read
-     * the saved content from the page's DOM.
-     *
-     * The next step below uses a custom event
-     * from PrayerTimes.
+     * Play the short alarm.
      */
+    playAlarm();
+  }, delay);
 
-  }, [
-    isEnabled,
-    prayerKey,
-    prayerLabel,
-    settings.minutesBefore,
-  ]);
+  return () => {
+    window.clearTimeout(timer);
+  };
+}, [
+  isEnabled,
+  prayerKey,
+  prayerLabel,
+  prayerTime,
+  settings.minutesBefore,
+]);
 
   /* -----------------------------------------------------
      TOGGLE
