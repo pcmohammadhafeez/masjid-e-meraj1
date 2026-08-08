@@ -325,10 +325,72 @@ export async function fetchContent(): Promise<SiteContent> {
   const dh = (hadith.data ?? {}) as Row;
 
   const storedTimes = (t["times"] ?? {}) as Record<string, unknown>;
-  const prayerTimes = { ...defaultContent.prayerTimes };
-  (Object.keys(prayerTimes) as PrayerKey[]).forEach((k) => {
-    prayerTimes[k] = str(storedTimes[k], defaultContent.prayerTimes[k]);
-  });
+
+function normalizePrayerTimeForKey(
+  key: PrayerKey,
+  value: string,
+): string {
+  const input = value.trim().toUpperCase();
+
+  // Already has AM/PM.
+  const twelveHour =
+    /^(1[0-2]|0?[1-9]):([0-5]\d)\s*(AM|PM)$/.exec(input);
+
+  if (twelveHour) {
+    let hour = Number(twelveHour[1]);
+    const minute = twelveHour[2];
+    const period = twelveHour[3];
+
+    if (period === "AM" && hour === 12) {
+      hour = 0;
+    }
+
+    if (period === "PM" && hour !== 12) {
+      hour += 12;
+    }
+
+    return `${String(hour).padStart(2, "0")}:${minute}`;
+  }
+
+  // HH:MM / H:MM without AM/PM.
+  const plain =
+    /^([0-2]?\d):([0-5]\d)$/.exec(input);
+
+  if (!plain) {
+    return value;
+  }
+
+  let hour = Number(plain[1]);
+  const minute = plain[2];
+
+  // Fajr and Sunrise are AM.
+  if (key === "fajr" || key === "sunrise") {
+    if (hour === 12) {
+      hour = 0;
+    }
+
+    return `${String(hour).padStart(2, "0")}:${minute}`;
+  }
+
+  // Dhuhr, Asr, Maghrib, Isha and Jumu'ah are PM
+  // when entered without AM/PM.
+  if (hour >= 1 && hour < 12) {
+    hour += 12;
+  }
+
+  return `${String(hour).padStart(2, "0")}:${minute}`;
+}
+
+const prayerTimes = { ...defaultContent.prayerTimes };
+
+(Object.keys(prayerTimes) as PrayerKey[]).forEach((k) => {
+  const raw = str(
+    storedTimes[k],
+    defaultContent.prayerTimes[k],
+  );
+
+  prayerTimes[k] = normalizePrayerTimeForKey(k, raw);
+});
 
   const announcements: Announcement[] = ((anns.data ?? []) as Row[]).map((a) => ({
     id: String(a["id"]),
