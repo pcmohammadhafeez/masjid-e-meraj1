@@ -139,24 +139,51 @@ function normalizePrayerTime(
 ): string {
   const input = value.trim();
 
-  const match = /^(\d{1,2}):([0-5]\d)$/.exec(input);
+  /*
+   * Accept existing 24-hour database values.
+   * This prevents unrelated admin changes such as Location
+   * from failing because an existing prayer time is 13:30.
+   */
+  const twentyFourHour =
+    /^([01]?\d|2[0-3]):([0-5]\d)$/.exec(input);
 
-  if (!match) {
+  if (twentyFourHour) {
+    const hour = Number(twentyFourHour[1]);
+    const minute = twentyFourHour[2];
+
+    return `${String(hour).padStart(2, "0")}:${minute}`;
+  }
+
+  /*
+   * Admin input:
+   *
+   * Fajr       5:02
+   * Sunrise    6:18
+   * Dhuhr      1:30
+   * Asr        5:15
+   * etc.
+   *
+   * No AM/PM is required.
+   */
+  const twelveHour =
+    /^([1-9]|1[0-2]):([0-5]\d)$/.exec(input);
+
+  if (!twelveHour) {
     throw new Error(
-      `Invalid time "${value}". Enter only time like 5:02 or 1:30.`,
+      `Invalid time "${value}". Enter time like 5:02 or 1:30.`,
     );
   }
 
-  let hour = Number(match[1]);
-  const minute = match[2];
+  let hour = Number(twelveHour[1]);
+  const minute = twelveHour[2];
 
-  if (hour < 1 || hour > 12) {
-    throw new Error(
-      `Invalid time "${value}". Enter an hour from 1 to 12.`,
-    );
-  }
-
-  const isMorning = key === "fajr" || key === "sunrise";
+  /*
+   * Fajr and Sunrise are AM.
+   * All other prayer times are PM.
+   */
+  const isMorning =
+    key === "fajr" ||
+    key === "sunrise";
 
   if (isMorning) {
     if (hour === 12) {
@@ -169,6 +196,27 @@ function normalizePrayerTime(
   }
 
   return `${String(hour).padStart(2, "0")}:${minute}`;
+}
+function formatAdminPrayerTime(value: string): string {
+  const input = value.trim();
+
+  const match = /^(\d{1,2}):([0-5]\d)$/.exec(input);
+
+  if (!match) {
+    return value;
+  }
+
+  const hour = Number(match[1]);
+  const minute = match[2];
+
+  const displayHour =
+    hour === 0
+      ? 12
+      : hour > 12
+        ? hour - 12
+        : hour;
+
+  return `${displayHour}:${minute}`;
 }
 function Admin() {
   const ADMIN_EMAIL = "committee@masjid-e-meraj.app";
@@ -418,20 +466,23 @@ function Admin() {
             <Panel title={t("prayer.title")}>
               <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
                 {PRAYERS.map((key) => (
-                  <Field
-                    key={key}
-                    label={t(`prayer.${key}`)}
-                    value={draft.prayerTimes[key]}
-                    onChange={(v) =>
-                      set("prayerTimes", { ...draft.prayerTimes, [key]: v })
-                    }
-                  />
-                ))}
+  <Field
+    key={key}
+    label={t(`prayer.${key}`)}
+    value={formatAdminPrayerTime(draft.prayerTimes[key])}
+    onChange={(v) =>
+      set("prayerTimes", {
+        ...draft.prayerTimes,
+        [key]: v,
+      })
+    }
+  />
+))}
                 <Field
-                  label="Jumu'ah Khutbah"
-                  value={draft.jumuahKhutbah}
-                  onChange={(v) => set("jumuahKhutbah", v)}
-                />
+  label="Jumu'ah Khutbah"
+  value={formatAdminPrayerTime(draft.jumuahKhutbah)}
+  onChange={(v) => set("jumuahKhutbah", v)}
+/>
               </div>
             </Panel>
           </TabsContent>
