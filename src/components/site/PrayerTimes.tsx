@@ -254,39 +254,93 @@ export function PrayerTimes() {
         ? "ur-PK"
         : "en-GB";
 
-  const mainKeys: PrayerKey[] = [
-    "fajr",
-    "dhuhr",
-    "asr",
-    "maghrib",
-    "isha",
-  ];
+  // The next upcoming prayer.
+// Main prayers are interpreted in India time:
+// Fajr = AM, Dhuhr/Asr/Maghrib/Isha = PM.
+const mainKeys: PrayerKey[] = [
+  "fajr",
+  "dhuhr",
+  "asr",
+  "maghrib",
+  "isha",
+];
 
-  let nextKey: PrayerKey | null = null;
+function prayerMinutes(
+  key: PrayerKey,
+  value: string,
+): number | null {
+  const match = /^\s*(\d{1,2}):(\d{2})/.exec(
+    value ?? "",
+  );
 
-  if (now) {
-    const nowMin =
-      now.getHours() * 60 + now.getMinutes();
-
-    const upcoming = mainKeys
-      .map((key) => ({
-        key,
-        minutes: toMinutes(content.prayerTimes[key], key),
-      }))
-      .filter(
-        (
-          item,
-        ): item is {
-          key: PrayerKey;
-          minutes: number;
-        } =>
-          item.minutes !== null &&
-          item.minutes > nowMin,
-      )
-      .sort((a, b) => a.minutes - b.minutes);
-
-    nextKey = upcoming[0]?.key ?? "fajr";
+  if (!match) {
+    return null;
   }
+
+  let hour = Number(match[1]);
+  const minute = Number(match[2]);
+
+  if (
+    hour < 1 ||
+    hour > 12 ||
+    minute < 0 ||
+    minute > 59
+  ) {
+    return null;
+  }
+
+  // Fajr is AM.
+  if (key === "fajr") {
+    if (hour === 12) {
+      hour = 0;
+    }
+  } else {
+    // Dhuhr, Asr, Maghrib and Isha are PM.
+    if (hour !== 12) {
+      hour += 12;
+    }
+  }
+
+  return hour * 60 + minute;
+}
+
+let nextKey: PrayerKey | null = null;
+
+if (now) {
+  const nowMin =
+    now.getHours() * 60 +
+    now.getMinutes();
+
+  const upcoming = mainKeys
+    .map((key) => ({
+      key,
+      minutes: prayerMinutes(
+        key,
+        content.prayerTimes[key],
+      ),
+    }))
+    .filter(
+      (
+        item,
+      ): item is {
+        key: PrayerKey;
+        minutes: number;
+      } =>
+        item.minutes !== null &&
+        item.minutes > nowMin,
+    )
+    .sort(
+      (a, b) =>
+        a.minutes - b.minutes,
+    );
+
+  // If all today's prayers have passed,
+  // Fajr becomes the next prayer for tomorrow.
+  nextKey =
+    upcoming.length > 0
+      ? upcoming[0].key
+      : "fajr";
+}
 
   return (
     <section
