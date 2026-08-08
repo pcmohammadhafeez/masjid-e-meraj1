@@ -1,0 +1,25 @@
+{
+  "name": "Masjid-e-Meraj",
+  "short_name": "Masjid-e-Meraj",
+  "description": "Prayer times, Quran and Islamic resources from Masjid-e-Meraj.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#071a14",
+  "theme_color": "#071a14",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": [
+    "lifestyle",
+    "religion"
+  ],
+  "icons": [
+    {
+      "src": "/masjid-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
