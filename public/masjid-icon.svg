@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b2b20"/>
+      <stop offset="100%" stop-color="#071a14"/>
+    </linearGradient>
+
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f6d77a"/>
+      <stop offset="50%" stop-color="#d8ad4a"/>
+      <stop offset="100%" stop-color="#b88725"/>
+    </linearGradient>
+  </defs>
+
+  <rect
+    width="512"
+    height="512"
+    rx="112"
+    fill="url(#bg)"
+  />
+
+  <!-- Crescent -->
+  <path
+    d="M256 82
+       C208 96 177 139 177 190
+       C177 250 226 299 286 299
+       C314 299 341 288 361 270
+       C341 315 297 346 243 346
+       C170 346 111 287 111 214
+       C111 148 159 93 222 78
+       C234 75 246 77 256 82Z"
+    fill="url(#gold)"
+  />
+
+  <!-- Star -->
+  <path
+    d="M361 108
+       L370 130
+       L394 133
+       L376 149
+       L381 173
+       L361 161
+       L340 173
+       L345 149
+       L327 133
+       L351 130Z"
+    fill="#f6d77a"
+  />
+
+  <!-- Mosque dome -->
+  <path
+    d="M153 337
+       C153 282 198 244 256 244
+       C314 244 359 282 359 337Z"
+    fill="url(#gold)"
+  />
+
+  <!-- Dome finial -->
+  <path
+    d="M250 244
+       L256 219
+       L262 244Z"
+    fill="#f6d77a"
+  />
+
+  <!-- Mosque body -->
+  <path
+    d="M143 337
+       H369
+       V407
+       H143Z"
+    fill="url(#gold)"
+  />
+
+  <!-- Door -->
+  <path
+    d="M235 407
+       V363
+       C235 345 244 334 256 334
+       C268 334 277 345 277 363
+       V407Z"
+    fill="#071a14"
+  />
+
+  <!-- Windows -->
+  <path
+    d="M174 357
+       C174 346 181 339 191 339
+       C201 339 208 346 208 357
+       V374
+       H174Z"
+    fill="#071a14"
+  />
+
+  <path
+    d="M304 357
+       C304 346 311 339 321 339
+       C331 339 338 346 338 357
+       V374
+       H304Z"
+    fill="#071a14"
+  />
+
+  <!-- Minarets -->
+  <path
+    d="M126 407
+       V270
+       H151
+       V407Z"
+    fill="url(#gold)"
+  />
+
+  <path
+    d="M361 407
+       V270
+       H386
+       V407Z"
+    fill="url(#gold)"
+  />
+
+  <!-- Minaret caps -->
+  <path
+    d="M118 270
+       L138 242
+       L158 270Z"
+    fill="#f6d77a"
+  />
+
+  <path
+    d="M353 270
+       L373 242
+       L393 270Z"
+    fill="#f6d77a"
+  />
+
+  <!-- Base -->
+  <rect
+    x="108"
+    y="407"
+    width="296"
+    height="18"
+    rx="9"
+    fill="#f6d77a"
+  />
+</svg>
