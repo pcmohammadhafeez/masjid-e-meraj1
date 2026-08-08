@@ -17,6 +17,7 @@ import { ContentProvider } from "../lib/content";
 import { Toaster } from "../components/ui/sonner";
 import { InstallPrompt } from "../components/site/InstallPrompt";
 import { PrayerNotificationScheduler } from "../components/site/PrayerNotificationScheduler";
+import { useEffect, type ReactNode } from "react";
 
 function NotFoundComponent() {
   return (
@@ -243,6 +244,27 @@ function RootShell({
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker
+          .register("/sw.js")
+          .then((registration) => {
+            console.log(
+              "Masjid-e-Meraj service worker registered:",
+              registration.scope,
+            );
+          })
+          .catch((error) => {
+            console.error(
+              "Service worker registration failed:",
+              error,
+            );
+          });
+      });
+    }
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
