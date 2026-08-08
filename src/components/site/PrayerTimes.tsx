@@ -90,35 +90,82 @@ function to12h(
   value: string,
   key?: PrayerKey,
 ): { time: string; suffix: string } {
-  const match = /^\s*(\d{1,2}):(\d{2})/.exec(value ?? "");
+  const input = value.trim().toUpperCase();
 
-  if (!match) {
+  // Already contains AM/PM
+  const twelveHour =
+    /^(1[0-2]|0?[1-9]):([0-5]\d)\s*(AM|PM)$/.exec(
+      input,
+    );
+
+  if (twelveHour) {
+    let hour = Number(twelveHour[1]);
+    const minute = twelveHour[2];
+    const period = twelveHour[3];
+
+    if (period === "AM" && hour === 12) {
+      hour = 0;
+    }
+
+    if (period === "PM" && hour !== 12) {
+      hour += 12;
+    }
+
+    const h12 = hour % 12 === 0 ? 12 : hour % 12;
+
     return {
-      time: value ?? "—",
+      time: `${h12}:${minute}`,
+      suffix: period,
+    };
+  }
+
+  // Already 24-hour format
+  const twentyFourHour =
+    /^([01]?\d|2[0-3]):([0-5]\d)$/.exec(input);
+
+  if (twentyFourHour) {
+    let hour = Number(twentyFourHour[1]);
+    const minute = twentyFourHour[2];
+
+    const suffix = hour >= 12 ? "PM" : "AM";
+    const h12 = hour % 12 === 0 ? 12 : hour % 12;
+
+    return {
+      time: `${h12}:${minute}`,
+      suffix,
+    };
+  }
+
+  // Plain H:MM from Admin
+  const plain =
+    /^([1-9]|1[0-2]):([0-5]\d)$/.exec(input);
+
+  if (!plain) {
+    return {
+      time: value || "—",
       suffix: "",
     };
   }
 
-  let hours = Number(match[1]);
-  const minutes = match[2];
+  let hour = Number(plain[1]);
+  const minute = plain[2];
 
-  // Admin allows entering only H:MM.
-  // Fajr and Sunrise are AM.
-  // Dhuhr, Asr, Maghrib, Isha and Jumu'ah are PM.
-  if (hours >= 1 && hours <= 11) {
-    if (
-      key !== "fajr" &&
-      key !== "sunrise"
-    ) {
-      hours += 12;
+  if (
+    key !== "fajr" &&
+    key !== "sunrise"
+  ) {
+    if (hour !== 12) {
+      hour += 12;
     }
+  } else if (hour === 12) {
+    hour = 0;
   }
 
-  const suffix = hours >= 12 ? "PM" : "AM";
-  const h12 = hours % 12 === 0 ? 12 : hours % 12;
+  const suffix = hour >= 12 ? "PM" : "AM";
+  const h12 = hour % 12 === 0 ? 12 : hour % 12;
 
   return {
-    time: `${h12}:${minutes}`,
+    time: `${h12}:${minute}`,
     suffix,
   };
 }
@@ -269,25 +316,51 @@ function prayerMinutes(
   key: PrayerKey,
   value: string,
 ): number | null {
-  const match = /^\s*(\d{1,2}):(\d{2})/.exec(
-    value ?? "",
-  );
+  const input = value.trim().toUpperCase();
 
-  if (!match) {
+  // 12-hour format with AM/PM
+  const twelveHour =
+    /^(1[0-2]|0?[1-9]):([0-5]\d)\s*(AM|PM)$/.exec(
+      input,
+    );
+
+  if (twelveHour) {
+    let hour = Number(twelveHour[1]);
+    const minute = Number(twelveHour[2]);
+    const period = twelveHour[3];
+
+    if (period === "AM" && hour === 12) {
+      hour = 0;
+    }
+
+    if (period === "PM" && hour !== 12) {
+      hour += 12;
+    }
+
+    return hour * 60 + minute;
+  }
+
+  // 24-hour format such as 05:35, 13:05, 18:41
+  const twentyFourHour =
+    /^([01]?\d|2[0-3]):([0-5]\d)$/.exec(input);
+
+  if (twentyFourHour) {
+    const hour = Number(twentyFourHour[1]);
+    const minute = Number(twentyFourHour[2]);
+
+    return hour * 60 + minute;
+  }
+
+  // Plain H:MM entered from Admin without AM/PM.
+  const plain =
+    /^([1-9]|1[0-2]):([0-5]\d)$/.exec(input);
+
+  if (!plain) {
     return null;
   }
 
-  let hour = Number(match[1]);
-  const minute = Number(match[2]);
-
-  if (
-    hour < 1 ||
-    hour > 12 ||
-    minute < 0 ||
-    minute > 59
-  ) {
-    return null;
-  }
+  let hour = Number(plain[1]);
+  const minute = Number(plain[2]);
 
   // Fajr is AM.
   if (key === "fajr") {
@@ -526,15 +599,18 @@ if (now) {
                       {prayer.key === "jumuah" && (
                         <span className="block text-[0.68rem] font-medium text-muted-foreground transition-colors duration-300 group-hover/row:text-foreground/75">
                           Khutbah{" "}
-                          {to12h(content.jumuahKhutbah).time}{" "}
-                          {to12h(content.jumuahKhutbah).suffix}
+                          {to12h(content.jumuahKhutbah, "jumuah").time}{" "}
+{to12h(content.jumuahKhutbah, "jumuah").suffix}
                         </span>
                       )}
                     </span>
-                    <PrayerNotificationSettings
-  prayerKey={prayer.key}
-  prayerLabel={t(`prayer.${prayer.key}`)}
-/>
+
+<div className="ms-2 flex shrink-0 items-center">
+  <PrayerNotificationSettings
+    prayerKey={prayer.key}
+    prayerLabel={t(`prayer.${prayer.key}`)}
+  />
+</div>
                   </li>
                 );
               })}
