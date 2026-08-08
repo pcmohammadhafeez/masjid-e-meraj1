@@ -76,7 +76,7 @@ function toMinutes(value: string): number | null {
 }
 
 export function PrayerTimes() {
-  const { content } = useContent();
+  const { content, loading } = useContent();
   const { t, lang } = useI18n();
   const now = useNow();
 
