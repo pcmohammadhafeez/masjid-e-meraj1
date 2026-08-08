@@ -155,44 +155,6 @@ function normalizePrayerTime(
       `Invalid time "${value}". Enter an hour from 1 to 12.`,
     );
   }
-function normalizePrayerTime(
-  value: string,
-  key: PrayerKey | "jumuahKhutbah",
-): string {
-  const input = value.trim();
-
-  const match = /^(\d{1,2}):([0-5]\d)$/.exec(input);
-
-  if (!match) {
-    throw new Error(
-      `Invalid time "${value}". Enter only time like 5:02 or 1:30.`,
-    );
-  }
-
-  let hour = Number(match[1]);
-  const minute = match[2];
-
-  if (hour < 1 || hour > 12) {
-    throw new Error(
-      `Invalid time "${value}". Enter an hour from 1 to 12.`,
-    );
-  }
-
-  const isMorning = key === "fajr" || key === "sunrise";
-
-  if (isMorning) {
-    if (hour === 12) {
-      hour = 0;
-    }
-  } else {
-    if (hour !== 12) {
-      hour += 12;
-    }
-  }
-
-  return `${String(hour).padStart(2, "0")}:${minute}`;
-}
-
 
   const isMorning = key === "fajr" || key === "sunrise";
 
