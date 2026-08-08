@@ -152,7 +152,7 @@ function Resources() {
                         {item.title[lang]}
                       </h3>
                       <div className="gold-rule mt-4" aria-hidden="true" />
-                      <p className="mt-4 text-sm leading-relaxed text-foreground/85">
+                      <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-foreground/85">
                         {item.body[lang]}
                       </p>
                     </div>
