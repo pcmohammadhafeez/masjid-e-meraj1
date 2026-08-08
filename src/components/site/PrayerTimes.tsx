@@ -12,6 +12,7 @@ import {
 
 import { Reveal } from "@/components/site/Reveal";
 import { useContent, type PrayerKey } from "@/lib/content";
+import { PrayerNotificationSettings } from "@/components/site/PrayerNotificationSettings";
 import { useI18n } from "@/lib/i18n";
 
 const prayerMeta: {
@@ -430,6 +431,10 @@ export function PrayerTimes() {
                         </span>
                       )}
                     </span>
+                    <PrayerNotificationSettings
+  prayerKey={prayer.key}
+  prayerLabel={t(`prayer.${prayer.key}`)}
+/>
                   </li>
                 );
               })}
