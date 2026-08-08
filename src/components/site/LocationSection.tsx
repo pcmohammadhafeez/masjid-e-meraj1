@@ -1,4 +1,9 @@
-import { ExternalLink, MapPin, Navigation, Sparkles } from "lucide-react";
+import {
+  ExternalLink,
+  MapPin,
+  Navigation,
+  Sparkles,
+} from "lucide-react";
 
 import { Reveal } from "@/components/site/Reveal";
 import { Button } from "@/components/ui/button";
@@ -9,18 +14,32 @@ export function LocationSection() {
   const { content } = useContent();
   const { t } = useI18n();
 
-  const { name, address, latitude, longitude, mapsUrl } =
-    content.location;
+  const {
+    name,
+    address,
+    latitude,
+    longitude,
+    mapsUrl,
+  } = content.location;
 
-  const coords = `${latitude},${longitude}`;
+  const lat = Number(latitude);
+  const lng = Number(longitude);
 
-  const embed = `https://www.google.com/maps?q=${encodeURIComponent(
-    coords,
-  )}&z=15&output=embed`;
+  const coords = `${lat},${lng}`;
 
-  const directions = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
-    coords,
-  )}`;
+  const embed =
+    `https://www.google.com/maps?q=${encodeURIComponent(coords)}` +
+    `&z=15&output=embed`;
+
+  const directions =
+    `https://www.google.com/maps/dir/?api=1&destination=` +
+    `${encodeURIComponent(coords)}`;
+
+  const openMap =
+    mapsUrl ||
+    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+      coords,
+    )}`;
 
   return (
     <Reveal as="article" className="h-full" delay={180}>
@@ -43,7 +62,8 @@ export function LocationSection() {
             h-44 w-44 rounded-full
             bg-gold/10 blur-3xl
             transition-all duration-1000
-            group-hover:scale-125 group-hover:bg-gold/15
+            group-hover:scale-125
+            group-hover:bg-gold/15
           "
         />
 
@@ -90,7 +110,14 @@ export function LocationSection() {
                 {t("loc.title")}
               </h2>
 
-              <div className="mt-1 flex items-center gap-1.5 text-[0.62rem] uppercase tracking-[0.18em] text-muted-foreground">
+              <div
+                className="
+                  mt-1 flex items-center gap-1.5
+                  text-[0.62rem] uppercase
+                  tracking-[0.18em]
+                  text-muted-foreground
+                "
+              >
                 <Sparkles className="h-3 w-3 text-gold" />
                 <span>Masjid Location</span>
               </div>
@@ -124,7 +151,7 @@ export function LocationSection() {
             </p>
           </div>
 
-          {/* Map */}
+          {/* Google Maps */}
           <div
             className="
               relative mt-5 overflow-hidden rounded-2xl
@@ -136,13 +163,14 @@ export function LocationSection() {
               group-hover:shadow-lift
             "
           >
-            {/* Map top overlay */}
             <div
               aria-hidden="true"
               className="
                 pointer-events-none absolute inset-x-0 top-0 z-10
-                h-8 bg-gradient-to-b
-                from-emerald-deep/20 to-transparent
+                h-8
+                bg-gradient-to-b
+                from-emerald-deep/20
+                to-transparent
               "
             />
 
@@ -161,7 +189,7 @@ export function LocationSection() {
             />
           </div>
 
-          {/* Actions */}
+          {/* Buttons */}
           <div className="mt-5 flex flex-wrap gap-3">
             <Button
               variant="gold"
@@ -174,11 +202,11 @@ export function LocationSection() {
               asChild
             >
               <a
-                href={mapsUrl || embed}
+                href={openMap}
                 target="_blank"
                 rel="noreferrer"
               >
-                <ExternalLink className="transition-transform duration-300 group-hover:rotate-[-8deg]" />
+                <ExternalLink className="h-4 w-4" />
                 {t("about.openMap")}
               </a>
             </Button>
@@ -198,16 +226,23 @@ export function LocationSection() {
                 target="_blank"
                 rel="noreferrer"
               >
-                <Navigation className="transition-transform duration-300 group-hover:translate-x-0.5" />
+                <Navigation className="h-4 w-4" />
                 {t("loc.directions")}
               </a>
             </Button>
           </div>
 
-          {/* Coordinates — subtle utility detail */}
-          <p className="mt-4 text-center text-[0.62rem] tracking-[0.12em] text-muted-foreground/70">
-            {latitude.toFixed(4)}° N&nbsp;&nbsp;•&nbsp;&nbsp;
-            {longitude.toFixed(4)}° E
+          {/* Coordinates */}
+          <p
+            className="
+              mt-4 text-center
+              text-[0.62rem]
+              tracking-[0.12em]
+              text-muted-foreground/70
+            "
+          >
+            {lat.toFixed(4)}° N&nbsp;&nbsp;•&nbsp;&nbsp;
+            {lng.toFixed(4)}° E
           </p>
         </div>
       </section>
