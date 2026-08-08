@@ -65,7 +65,7 @@ function to12h(value: string): { time: string; suffix: string } {
   const minutes = match[2];
   const suffix = hours >= 12 ? "PM" : "AM";
   const h12 = hours % 12 === 0 ? 12 : hours % 12;
-  return { time: `${String(h12).padStart(2, "0")}:${minutes}`, suffix };
+  return { time: `${h12}:${minutes}`, suffix };
 }
 
 /** Minutes since midnight for a stored "HH:MM" value. */
