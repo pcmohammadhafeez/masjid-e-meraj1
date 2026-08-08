@@ -133,7 +133,46 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
     </section>
   );
 }
+function normalizePrayerTime(value: string): string {
+  const input = value.trim().toUpperCase();
 
+  // Already in 24-hour HH:MM format
+  const twentyFourHour = /^([01]?\d|2[0-3]):([0-5]\d)$/.exec(input);
+
+  if (twentyFourHour) {
+    const hour = Number(twentyFourHour[1]);
+    const minute = twentyFourHour[2];
+
+    return `${String(hour).padStart(2, "0")}:${minute}`;
+  }
+
+  // 12-hour format such as:
+  // 5:02 AM
+  // 1:05 PM
+  // 12:30 PM
+  const twelveHour =
+    /^(1[0-2]|0?[1-9]):([0-5]\d)\s*(AM|PM)$/.exec(input);
+
+  if (twelveHour) {
+    let hour = Number(twelveHour[1]);
+    const minute = twelveHour[2];
+    const period = twelveHour[3];
+
+    if (period === "AM" && hour === 12) {
+      hour = 0;
+    }
+
+    if (period === "PM" && hour !== 12) {
+      hour += 12;
+    }
+
+    return `${String(hour).padStart(2, "0")}:${minute}`;
+  }
+
+  throw new Error(
+    `Invalid prayer time "${value}". Please use a format such as 5:02 AM or 1:05 PM.`,
+  );
+}
 function Admin() {
   const ADMIN_EMAIL = "committee@masjid-e-meraj.app";
   const {
@@ -296,12 +335,31 @@ function Admin() {
               variant="gold"
               className="rounded-full"
               onClick={() => {
-                void saveContent(draft)
-                  .then(() => toast.success(t("admin.saved")))
-                  .catch((err: unknown) =>
-                    toast.error(err instanceof Error ? err.message : "Save failed"),
-                  );
-              }}
+  try {
+    const normalizedPrayerTimes = Object.fromEntries(
+      Object.entries(draft.prayerTimes).map(([key, value]) => [
+        key,
+        normalizePrayerTime(value),
+      ]),
+    ) as SiteContent["prayerTimes"];
+
+    const normalizedKhutbah = normalizePrayerTime(draft.jumuahKhutbah);
+
+    const nextDraft: SiteContent = {
+      ...draft,
+      prayerTimes: normalizedPrayerTimes,
+      jumuahKhutbah: normalizedKhutbah,
+    };
+
+    void saveContent(nextDraft)
+      .then(() => toast.success(t("admin.saved")))
+      .catch((err: unknown) =>
+        toast.error(err instanceof Error ? err.message : "Save failed"),
+      );
+  } catch (err) {
+    toast.error(err instanceof Error ? err.message : "Invalid prayer time");
+  }
+}}
             >
               <Save /> {t("admin.save")}
             </Button>
