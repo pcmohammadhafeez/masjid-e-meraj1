@@ -83,16 +83,32 @@ export function PrayerTimes() {
   const locale = lang === "te" ? "te-IN" : lang === "ur" ? "ur-PK" : "en-GB";
 
   // The next upcoming prayer (main prayers only, wraps to Fajr after Isha).
-  const mainKeys: PrayerKey[] = ["fajr", "dhuhr", "asr", "maghrib", "isha"];
-  let nextKey: PrayerKey | null = null;
-  if (now) {
-    const nowMin = now.getHours() * 60 + now.getMinutes();
-    nextKey =
-      mainKeys.find((key) => {
-        const mins = toMinutes(content.prayerTimes[key]);
-        return mins !== null && mins > nowMin;
-      }) ?? "fajr";
-  }
+  const mainKeys: PrayerKey[] = [
+  "fajr",
+  "dhuhr",
+  "asr",
+  "maghrib",
+  "isha",
+];
+
+let nextKey: PrayerKey | null = null;
+
+if (now) {
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+
+  const upcoming = mainKeys
+    .map((key) => ({
+      key,
+      minutes: toMinutes(content.prayerTimes[key]),
+    }))
+    .filter(
+      (item): item is { key: PrayerKey; minutes: number } =>
+        item.minutes !== null && item.minutes > nowMin,
+    )
+    .sort((a, b) => a.minutes - b.minutes);
+
+  nextKey = upcoming[0]?.key ?? "fajr";
+}
 
   return (
     <section
