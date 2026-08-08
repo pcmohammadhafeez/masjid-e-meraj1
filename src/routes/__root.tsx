@@ -16,6 +16,7 @@ import { LanguageProvider } from "../lib/i18n";
 import { ContentProvider } from "../lib/content";
 import { Toaster } from "../components/ui/sonner";
 import { InstallPrompt } from "../components/site/InstallPrompt";
+import { PrayerNotificationScheduler } from "../components/site/PrayerNotificationScheduler";
 
 function NotFoundComponent() {
   return (
@@ -253,6 +254,8 @@ function RootComponent() {
             <Toaster />
 
             <InstallPrompt />
+
+            <PrayerNotificationScheduler />
           </ContentProvider>
         </LanguageProvider>
       </ThemeProvider>
