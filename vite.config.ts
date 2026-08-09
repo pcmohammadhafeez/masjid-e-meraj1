@@ -23,9 +23,13 @@ export default defineConfig({
         devOptions: { enabled: false },
         filename: "sw.js",
         manifest: false,
+        // TanStack Start emits browser files to dist/client; the worker must
+        // live beside them so it is served from /sw.js.
+        outDir: "dist/client",
         workbox: {
           // Keeps the existing prayer-time push notifications working.
           importScripts: ["/push-sw.js"],
+          globDirectory: "dist/client",
           globPatterns: ["**/*.{js,css,html,svg,ico,woff2}"],
           maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
           navigateFallback: "/",
