@@ -32,8 +32,9 @@ export default defineConfig({
           globDirectory: "dist/client",
           globPatterns: ["**/*.{js,css,html,svg,ico,woff2}"],
           maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
-          navigateFallback: "/",
-          navigateFallbackDenylist: [/^\/~oauth/, /^\/api\//],
+          // Pages are server-rendered, so there is no precached HTML shell to
+          // fall back to; navigations are handled by the runtime rule below.
+          navigateFallback: undefined,
           cleanupOutdatedCaches: true,
           clientsClaim: true,
           skipWaiting: true,
