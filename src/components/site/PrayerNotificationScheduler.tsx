@@ -1,5 +1,7 @@
 import { useEffect } from "react";
 
+import { ensureServiceWorker } from "@/lib/register-sw";
+
 const VAPID_PUBLIC_KEY =
   import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
@@ -81,9 +83,10 @@ export function PrayerNotificationScheduler() {
 
       try {
         const registration =
-          await navigator.serviceWorker.register(
+          (await ensureServiceWorker()) ??
+          (await navigator.serviceWorker.register(
             "/sw.js",
-          );
+          ));
 
         if (cancelled) {
           return;
