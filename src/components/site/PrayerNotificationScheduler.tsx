@@ -1,11 +1,13 @@
 import { useEffect } from "react";
 
+import { ensureServiceWorker } from "@/lib/register-sw";
+
 const VAPID_PUBLIC_KEY =
   import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
 function urlBase64ToUint8Array(
   base64String: string,
-): Uint8Array {
+): Uint8Array<ArrayBuffer> {
   const padding =
     "=".repeat((4 - (base64String.length % 4)) % 4);
 
@@ -18,11 +20,15 @@ function urlBase64ToUint8Array(
 
   const rawData = window.atob(base64);
 
-  return Uint8Array.from(
-    [...rawData].map((char) =>
-      char.charCodeAt(0),
-    ),
+  const bytes = new Uint8Array(
+    new ArrayBuffer(rawData.length),
   );
+
+  for (let i = 0; i < rawData.length; i += 1) {
+    bytes[i] = rawData.charCodeAt(i);
+  }
+
+  return bytes;
 }
 
 function arrayBufferToBase64Url(
@@ -77,9 +83,10 @@ export function PrayerNotificationScheduler() {
 
       try {
         const registration =
-          await navigator.serviceWorker.register(
+          (await ensureServiceWorker()) ??
+          (await navigator.serviceWorker.register(
             "/sw.js",
-          );
+          ));
 
         if (cancelled) {
           return;

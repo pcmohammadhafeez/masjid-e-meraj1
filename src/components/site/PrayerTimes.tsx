@@ -14,6 +14,7 @@ import { Reveal } from "@/components/site/Reveal";
 import { useContent, type PrayerKey } from "@/lib/content";
 import { PrayerNotificationSettings } from "@/components/site/PrayerNotificationSettings";
 import { useI18n } from "@/lib/i18n";
+import { formatHijriDate } from "@/lib/hijri";
 
 const prayerMeta: {
   key: PrayerKey;
@@ -56,30 +57,9 @@ function formatClock(date: Date) {
   )} ${h >= 12 ? "PM" : "AM"}`;
 }
 
-function formatHijri(date: Date) {
+function formatHijri(date: Date, lang: "en" | "te" | "ur") {
   try {
-    const formatter = new Intl.DateTimeFormat(
-      "en-IN-u-ca-islamic-umalqura",
-      {
-        timeZone: "Asia/Kolkata",
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      },
-    );
-
-    const parts = formatter.formatToParts(date);
-
-    const day =
-      parts.find((part) => part.type === "day")?.value ?? "";
-
-    const month =
-      parts.find((part) => part.type === "month")?.value ?? "";
-
-    const year =
-      parts.find((part) => part.type === "year")?.value ?? "";
-
-    return `${day} ${month} ${year} AH`;
+    return formatHijriDate(date, lang);
   } catch {
     return "—";
   }
@@ -636,7 +616,7 @@ if (now) {
                   Icon: Moon,
                   label: t("prayer.hijri"),
                   value: now
-                    ? formatHijri(now)
+                    ? formatHijri(now, lang)
                     : "—",
                 },
                 {

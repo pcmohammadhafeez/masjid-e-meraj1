@@ -17,6 +17,8 @@ import { ContentProvider } from "../lib/content";
 import { Toaster } from "../components/ui/sonner";
 import { InstallPrompt } from "../components/site/InstallPrompt";
 import { PrayerNotificationScheduler } from "../components/site/PrayerNotificationScheduler";
+import { OfflineNotice } from "../components/site/OfflineNotice";
+import { ensureServiceWorker } from "../lib/register-sw";
 
 function NotFoundComponent() {
   return (
@@ -245,25 +247,8 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   useEffect(() => {
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker
-        .register("/sw.js")
-        .then((registration) => {
-          console.log(
-            "Masjid-e-Meraj service worker registered:",
-            registration.scope,
-          );
-        })
-        .catch((error) => {
-          console.error(
-            "Service worker registration failed:",
-            error,
-          );
-        });
-    });
-  }
-}, []);
+    void ensureServiceWorker();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -277,6 +262,8 @@ function RootComponent() {
             <InstallPrompt />
 
             <PrayerNotificationScheduler />
+
+            <OfflineNotice />
           </ContentProvider>
         </LanguageProvider>
       </ThemeProvider>
