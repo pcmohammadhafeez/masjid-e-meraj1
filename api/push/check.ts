@@ -148,8 +148,9 @@ export default async function handler(
           toMinutes(raw);
 
         return (
-          prayerMinutes !== null &&
-          prayerMinutes === targetMinutes
+            prayerMinutes !== null &&
+  prayerMinutes >= currentMinutes + 4 &&
+  prayerMinutes <= currentMinutes + 7
         );
       },
     );
