@@ -12,7 +12,6 @@ jobs:
     steps:
       - name: Check prayer time
         run: |
-          curl -X POST \
-            "https://masjid-e-meraj1.vercel.app/api/push/check" \
+          curl -X POST "https://masjid-e-meraj1.vercel.app/api/push/check" \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             -H "Content-Type: application/json"
