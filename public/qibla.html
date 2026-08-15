@@ -1,0 +1,278 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#071a12">
+<title>Qibla Finder - Masjid-e-Meraj</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:Arial,sans-serif;
+  background:linear-gradient(160deg,#071a12,#0d2d20);
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+}
+.app{
+  width:100%;
+  max-width:460px;
+  text-align:center;
+}
+h1{margin:0 0 8px;font-size:28px}
+.subtitle{opacity:.75;margin-bottom:24px}
+.compass{
+  width:min(82vw,330px);
+  height:min(82vw,330px);
+  margin:0 auto 25px;
+  border-radius:50%;
+  border:3px solid rgba(255,255,255,.3);
+  background:radial-gradient(circle,#163f2d,#092218);
+  position:relative;
+  box-shadow:0 15px 50px rgba(0,0,0,.4);
+  transition:transform .15s linear;
+}
+.ring{
+  position:absolute;
+  inset:12px;
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:50%;
+}
+.direction{
+  position:absolute;
+  top:18px;
+  left:50%;
+  transform:translateX(-50%);
+  font-weight:bold;
+  font-size:18px;
+}
+.south{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);opacity:.6}
+.east{position:absolute;right:20px;top:50%;transform:translateY(-50%);opacity:.6}
+.west{position:absolute;left:20px;top:50%;transform:translateY(-50%);opacity:.6}
+.arrow{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:8px;
+  height:125px;
+  transform-origin:50% 100%;
+  transform:translate(-50%,-100%) rotate(0deg);
+}
+.arrow:before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:50%;
+  transform:translateX(-50%);
+  border-left:18px solid transparent;
+  border-right:18px solid transparent;
+  border-bottom:38px solid #fff;
+}
+.arrow:after{
+  content:"";
+  position:absolute;
+  bottom:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:8px;
+  height:105px;
+  background:white;
+  border-radius:8px;
+}
+.kaaba{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:58px;
+  height:58px;
+  border-radius:50%;
+  background:#111;
+  border:3px solid #d6b85a;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:27px;
+}
+.card{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:18px;
+  padding:18px;
+  margin-top:15px;
+}
+.bearing{font-size:32px;font-weight:bold}
+.distance{opacity:.7;margin-top:5px}
+button{
+  border:0;
+  border-radius:12px;
+  padding:14px 22px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+  background:#d6b85a;
+  color:#111;
+  margin-top:18px;
+}
+.status{margin-top:15px;min-height:22px;opacity:.8;font-size:14px}
+.small{font-size:12px;opacity:.5;margin-top:20px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>Qibla Finder</h1>
+  <div class="subtitle">Masjid-e-Meraj</div>
+  <div class="compass" id="compass">
+    <div class="ring"></div>
+    <div class="direction">N</div>
+    <div class="south">S</div>
+    <div class="east">E</div>
+    <div class="west">W</div>
+    <div class="arrow" id="arrow"></div>
+    <div class="kaaba">🕋</div>
+  </div>
+  <div class="card">
+    <div class="bearing" id="bearing">--°</div>
+    <div>Qibla direction from your location</div>
+    <div class="distance" id="distance">Location not detected</div>
+  </div>
+  <button id="start">Enable Qibla Compass</button>
+  <div class="status" id="status">Tap the button to start.</div>
+  <div class="small">
+    Keep your phone flat and away from magnets or metal objects.
+    Location and motion permissions are required.
+  </div>
+</div>
+<script>
+const KAABA_LAT = 21.422487;
+const KAABA_LON = 39.826206;
+const arrow = document.getElementById("arrow");
+const bearingEl = document.getElementById("bearing");
+const distanceEl = document.getElementById("distance");
+const statusEl = document.getElementById("status");
+const startBtn = document.getElementById("start");
+let qiblaBearing = null;
+let heading = null;
+function degToRad(d){return d*Math.PI/180}
+function radToDeg(r){return r*180/Math.PI}
+function calculateQibla(lat, lon){
+  const phi1 = degToRad(lat);
+  const phi2 = degToRad(KAABA_LAT);
+  const dlambda = degToRad(KAABA_LON - lon);
+  const y = Math.sin(dlambda);
+  const x =
+    Math.cos(phi1) * Math.tan(phi2) -
+    Math.sin(phi1) * Math.cos(dlambda);
+  let bearing = radToDeg(Math.atan2(y,x));
+  return (bearing + 360) % 360;
+}
+function calculateDistance(lat1,lon1,lat2,lon2){
+  const R=6371;
+  const p1=degToRad(lat1);
+  const p2=degToRad(lat2);
+  const dp=degToRad(lat2-lat1);
+  const dl=degToRad(lon2-lon1);
+  const a=Math.sin(dp/2)**2+
+    Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+function updateCompass(){
+  if(qiblaBearing === null || heading === null) return;
+  let relative = qiblaBearing - heading;
+  relative = (relative + 360) % 360;
+  arrow.style.transform =
+    "translate(-50%,-100%) rotate("+relative+"deg)";
+  bearingEl.textContent =
+    Math.round(qiblaBearing)+"°";
+}
+function handleOrientation(event){
+  let newHeading = null;
+  if(typeof event.webkitCompassHeading === "number"){
+    newHeading = event.webkitCompassHeading;
+  }else if(typeof event.alpha === "number"){
+    newHeading = (360 - event.alpha) % 360;
+  }
+  if(newHeading !== null){
+    heading = newHeading;
+    updateCompass();
+    statusEl.textContent =
+      "Compass active — point the arrow forward.";
+  }
+}
+async function requestMotionPermission(){
+  if(
+    typeof DeviceOrientationEvent !== "undefined" &&
+    typeof DeviceOrientationEvent.requestPermission === "function"
+  ){
+    const permission =
+      await DeviceOrientationEvent.requestPermission();
+    if(permission !== "granted"){
+      throw new Error("Motion permission was denied.");
+    }
+  }
+}
+function getLocation(){
+  return new Promise((resolve,reject)=>{
+    if(!navigator.geolocation){
+      reject(new Error("Geolocation is not supported."));
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      resolve,
+      reject,
+      {
+        enableHighAccuracy:true,
+        timeout:15000,
+        maximumAge:60000
+      }
+    );
+  });
+}
+async function start(){
+  startBtn.disabled=true;
+  statusEl.textContent="Requesting permissions...";
+  try{
+    await requestMotionPermission();
+    statusEl.textContent="Getting your location...";
+    const position = await getLocation();
+    const lat = position.coords.latitude;
+    const lon = position.coords.longitude;
+    qiblaBearing = calculateQibla(lat,lon);
+    const distance =
+      calculateDistance(
+        lat,
+        lon,
+        KAABA_LAT,
+        KAABA_LON
+      );
+    distanceEl.textContent =
+      Math.round(distance)+" km from the Kaaba";
+    window.addEventListener(
+      "deviceorientationabsolute",
+      handleOrientation,
+      true
+    );
+    window.addEventListener(
+      "deviceorientation",
+      handleOrientation,
+      true
+    );
+    statusEl.textContent =
+      "Compass active. Hold your phone flat.";
+    updateCompass();
+  }catch(error){
+    console.error(error);
+    statusEl.textContent =
+      error.message ||
+      "Unable to start the Qibla compass.";
+    startBtn.disabled=false;
+  }
+}
+startBtn.addEventListener("click",start);
+</script>
+</body>
+</html>
