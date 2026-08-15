@@ -1,0 +1,13 @@
+﻿name: Jumuah Reminder
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+jobs:
+  jumuah:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Jumuah
+        run: |
+          curl -X POST "https://masjid-e-meraj1.vercel.app/api/jumuah/check" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json"
