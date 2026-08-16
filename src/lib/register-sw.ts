@@ -5,7 +5,7 @@
  * development, otherwise stale HTML and deleted chunks can be served back.
  */
 
-const SW_URL = "/sw.js";
+const SW_URL = "/push-sw.js";
 
 function isPreviewHost(hostname: string): boolean {
   return (

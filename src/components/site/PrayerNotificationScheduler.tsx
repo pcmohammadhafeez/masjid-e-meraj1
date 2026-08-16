@@ -85,7 +85,7 @@ export function PrayerNotificationScheduler() {
         const registration =
           (await ensureServiceWorker()) ??
           (await navigator.serviceWorker.register(
-            "/sw.js",
+            "/push-sw.js",
           ));
 
         if (cancelled) {
