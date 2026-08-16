@@ -490,7 +490,7 @@ if (now) {
                   <li
                     key={prayer.key}
                     className={`
-                      group/row relative flex items-center gap-3 px-5
+                      group/row relative grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-3 px-5
                       transition-all duration-500 ease-out
                       hover:bg-secondary/60
                       sm:px-8
@@ -587,7 +587,7 @@ if (now) {
                     />
 
                     {/* Time */}
-                    <span className="ms-auto min-w-[5.75rem] text-end sm:ms-0">
+                    <span className="min-w-[6.5rem] text-end">
                       <span
                         className={`
                           font-clock block
