@@ -1,3 +1,5 @@
+@import "./styles/masjid-premium-v3.css";
+
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
@@ -1304,5 +1306,3 @@ a {
 /* ============================================================
    EDITORIAL ISLAMIC V2 — END
    ============================================================ */
-
-@import "./styles/masjid-premium-v3.css";
