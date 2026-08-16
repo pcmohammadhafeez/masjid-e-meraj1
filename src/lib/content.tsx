@@ -24,6 +24,9 @@ import type { Lang } from "./i18n";
 /** Bucket that holds every uploaded file (Quran PDF, logo, hero image). */
 export const ASSET_BUCKET = "site-assets";
 
+/** localStorage key storing the last successful online content fetch. */
+const UPDATED_KEY = "mem-content-updated";
+
 export type Multilingual = Record<Lang, string>;
 
 export type PrayerKey = "fajr" | "sunrise" | "dhuhr" | "asr" | "maghrib" | "isha" | "jumuah";
@@ -535,6 +538,8 @@ export async function removeAsset(path: string): Promise<void> {
 type ContentContextValue = {
   content: SiteContent;
   loading: boolean;
+  /** Epoch ms of the last successful online fetch (null until first load). */
+  lastUpdated: number | null;
   refresh: () => Promise<void>;
   saveContent: (next: SiteContent) => Promise<void>;
   resetContent: () => Promise<void>;
@@ -549,6 +554,7 @@ type ContentContextValue = {
 const ContentContext = createContext<ContentContextValue>({
   content: defaultContent,
   loading: true,
+  lastUpdated: null,
   refresh: async () => {},
   saveContent: async () => {},
   resetContent: async () => {},
@@ -563,16 +569,40 @@ const ContentContext = createContext<ContentContextValue>({
 export function ContentProvider({ children }: { children: ReactNode }) {
   const [content, setContent] = useState<SiteContent>(defaultContent);
   const [loading, setLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<number | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
   const refresh = useCallback(async () => {
     try {
-      setContent(await fetchContent());
+      const next = await fetchContent();
+      setContent(next);
+      // Only stamp the timestamp on a genuine online fetch, so the offline
+      // banner reports when the times were last refreshed from the server
+      // rather than the moment the cache was replayed.
+      if (typeof navigator === "undefined" || navigator.onLine) {
+        const ts = Date.now();
+        setLastUpdated(ts);
+        try {
+          window.localStorage.setItem(UPDATED_KEY, String(ts));
+        } catch {
+          /* ignore storage errors */
+        }
+      }
     } catch (error) {
       console.error("[content] failed to load", error);
     } finally {
       setLoading(false);
+    }
+  }, []);
+
+  // Restore the last-known fetch time so it survives a fresh offline reload.
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(UPDATED_KEY);
+      if (stored) setLastUpdated(Number(stored));
+    } catch {
+      /* ignore */
     }
   }, []);
 
@@ -656,6 +686,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
     () => ({
       content,
       loading,
+      lastUpdated,
       refresh,
       saveContent,
       resetContent,
@@ -669,6 +700,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
     [
       content,
       loading,
+      lastUpdated,
       refresh,
       saveContent,
       resetContent,
