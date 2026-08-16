@@ -284,7 +284,7 @@ function PrayerLoadingSkeleton() {
           </div>
 
           {/* Bottom skeleton */}
-          <div className="grid gap-3 border-t border-gold/25 bg-secondary/60 px-5 py-4 sm:grid-cols-3 sm:px-6">
+          <div className="grid gap-3 border-t border-gold/25 bg-secondary/60 px-3 py-2 sm:grid-cols-3 sm:px-6">
             {[1, 2, 3].map((item) => (
               <div
                 key={item}
@@ -638,7 +638,7 @@ if (now) {
             </ul>
 
             {/* Date / Hijri / Live Clock */}
-            <div className="grid gap-3 border-t border-gold/25 bg-secondary/60 px-5 py-4 sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <div className="grid gap-3 border-t border-gold/25 bg-secondary/60 px-3 py-2 sm:grid-cols-3 sm:gap-4 sm:px-6">
               {[
                 {
                   Icon: CalendarDays,
