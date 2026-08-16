@@ -26,6 +26,7 @@ export function Navbar({ transparent = true }: { transparent?: boolean }) {
   const links = [
     { label: t("nav.home"), to: "/" },
     { label: t("nav.resources"), to: "/resources" },
+    { label: "Qibla Finder", to: "/qibla.html" },
   ];
   const solid = scrolled || !transparent;
 
