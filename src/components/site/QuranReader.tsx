@@ -8,8 +8,12 @@ import {
   ChevronRight,
   Maximize2,
   Minimize2,
+  MoveVertical,
   Moon,
   Sun,
+  ZoomIn,
+  ZoomOut,
+  ArrowLeftRight,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -128,8 +132,8 @@ export function QuranReader() {
       if (!slot) return;
       const behavior: ScrollBehavior = instant ? "auto" : "smooth";
       fromScroll.current = true;
-      el.scrollTo({ left: (next - 1) * el.clientWidth, behavior });
-      
+      if (mode === "swipe") el.scrollTo({ left: (next - 1) * el.clientWidth, behavior });
+      else el.scrollTo({ top: slot.offsetTop, behavior });
       window.setTimeout(
         () => {
           fromScroll.current = false;
@@ -147,7 +151,7 @@ export function QuranReader() {
       const el = scrollerRef.current;
       if (!el || !total) return;
       let index: number;
-      if (true) {
+      if (mode === "swipe") {
         index = Math.round(el.scrollLeft / Math.max(1, el.clientWidth));
       } else {
         const slot = el.firstElementChild as HTMLElement | null;
@@ -158,6 +162,63 @@ export function QuranReader() {
       if (next !== pageRef.current) setPage(next);
     });
   };
+
+  /* ---------- pinch + double tap zoom ---------- */
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    let startDist = 0;
+    let startZoom = 1;
+    let lastTap = 0;
+
+    const dist = (t: TouchList) =>
+      Math.hypot(t[0]!.clientX - t[1]!.clientX, t[0]!.clientY - t[1]!.clientY);
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        startDist = dist(e.touches);
+        setZoom((z) => {
+          startZoom = z;
+          return z;
+        });
+      }
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length !== 2 || !startDist) return;
+      e.preventDefault();
+      setZoom(clamp(startZoom * (dist(e.touches) / startDist), MIN_ZOOM, MAX_ZOOM));
+    };
+    const onTouchEnd = (e: TouchEvent) => {
+      if (e.touches.length === 0 && startDist) {
+        startDist = 0;
+        return;
+      }
+      const now = Date.now();
+      if (now - lastTap < 280) {
+        setZoom((z) => (z > 1.05 ? 1 : 2.2));
+        lastTap = 0;
+      } else {
+        lastTap = now;
+      }
+    };
+    const onWheel = (e: WheelEvent) => {
+      if (!e.ctrlKey) return;
+      e.preventDefault();
+      const dy = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 100 : 1);
+      setZoom((z) => clamp(z * Math.exp(-dy * 0.0015), MIN_ZOOM, MAX_ZOOM));
+    };
+
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchmove", onTouchMove, { passive: false });
+    el.addEventListener("touchend", onTouchEnd, { passive: true });
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchmove", onTouchMove);
+      el.removeEventListener("touchend", onTouchEnd);
+      el.removeEventListener("wheel", onWheel);
+    };
+  }, []);
 
   /* ---------- fullscreen + keyboard ---------- */
   useEffect(() => {
@@ -213,6 +274,187 @@ export function QuranReader() {
               {total ? `Page ${page} of ${total}` : "Preparing pages…"}
             </p>
           </div>
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          <Button
+            variant="outlineGold"
+            size="icon"
+            className="h-9 w-9 rounded-full"
+            onClick={toggleBookmark}
+            aria-label={bookmarked ? "Remove bookmark" : "Bookmark this page"}
+          >
+            {bookmarked ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
+          </Button>
+          <Button
+            variant="outlineGold"
+            size="icon"
+            className="h-9 w-9 rounded-full"
+            onClick={() => setNight((n) => !n)}
+            aria-label={night ? "Light pages" : "Dark pages"}
+          >
+            {night ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
+          <Button
+            variant="outlineGold"
+            size="icon"
+            className="h-9 w-9 rounded-full"
+            onClick={onFullscreen}
+            aria-label={fullscreen ? "Exit full screen" : "Full screen"}
+          >
+            {fullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+          </Button>
+        </div>
+      </div>
+
+      {/* ---------- continue reading ---------- */}
+      {resume && resume !== page && (
+        <button
+          type="button"
+          onClick={() => {
+            goTo(resume);
+            setResume(null);
+          }}
+          className="mt-3 w-full rounded-2xl border border-gold/40 bg-secondary/60 px-4 py-2 text-left text-xs font-medium text-foreground transition-colors hover:bg-secondary press"
+        >
+          Continue reading from page {resume}
+        </button>
+      )}
+
+      {/* ---------- bookmarks ---------- */}
+      {bookmarks.length > 0 && (
+        <div className="mt-3 flex gap-1.5 overflow-x-auto pb-1">
+          {bookmarks.map((b) => (
+            <button
+              key={b}
+              type="button"
+              onClick={() => goTo(b)}
+              className={cn(
+                "shrink-0 rounded-full border border-border px-3 py-1 text-[11px] tabular-nums text-muted-foreground transition-colors",
+                b === page && "border-gold/60 text-gold",
+              )}
+            >
+              {b}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* ---------- pages ---------- */}
+      <div
+        ref={scrollerRef}
+        onScroll={onScroll}
+        className={cn(
+          "mt-3 rounded-2xl bg-muted overscroll-contain",
+          "[-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+          mode === "swipe"
+            ? "flex overflow-x-auto overflow-y-auto"
+            : "block overflow-y-auto overflow-x-auto",
+          zoom <= 1.02 && "snap-y snap-mandatory",
+        )}
+        style={{ height: viewportHeight, touchAction: zoom > 1.02 ? "pan-x pan-y" : undefined }}
+      >
+        {Array.from({ length: total }, (_, i) => i + 1).map((p) => {
+          const url = urls[p];
+          const visible = windowPages.includes(p);
+          return (
+            <div
+              key={p}
+              className={cn(
+                "shrink-0",
+                mode === "swipe" ? "h-full w-full snap-center snap-always" : "w-full pb-2",
+              )}
+            >
+              <div
+                className="mx-auto"
+                style={
+                  mode === "swipe"
+                    ? { width: `${zoom * 100}%`, height: "100%" }
+                    : { width: `${zoom * 100}%`, aspectRatio: String(ASPECT) }
+                }
+              >
+                {visible && url ? (
+                  <img
+                    src={url}
+                    alt={`Quran page ${p}`}
+                    width={900}
+                    height={1400}
+                    decoding="async"
+                    loading={p === page ? "eager" : "lazy"}
+                    draggable={false}
+                    className={cn(
+                      "quran-page-image h-full w-full select-none object-contain",
+                      night && "invert-[0.92] hue-rotate-180 brightness-[0.95]",
+                    )}
+                  />
+                ) : (
+                  <div
+                    className="h-full w-full animate-pulse rounded-xl bg-gradient-to-b from-secondary/70 via-muted to-secondary/70"
+                    aria-hidden="true"
+                  />
+                )}
+              </div>
+            </div>
+          );
+        })}
+        {!total && (
+          <div className="grid h-full w-full place-items-center p-6 text-center text-sm text-muted-foreground">
+            {isLoading ? "Loading the Quran…" : "Quran pages have not been uploaded yet."}
+          </div>
+        )}
+      </div>
+
+      {/* ---------- bottom bar ---------- */}
+      <div className="quran-reader-controls mt-3 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5">
+          <Button
+            variant="outlineGold"
+            size="icon"
+            className="h-9 w-9 rounded-full"
+            onClick={() => goTo(page - 1)}
+            disabled={page <= 1}
+            aria-label="Previous page"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span className="rounded-full bg-secondary px-3 py-1.5 text-xs font-semibold tabular-nums text-foreground">
+            {page}
+            <span className="text-muted-foreground"> / {total || "—"}</span>
+          </span>
+          <Button
+            variant="outlineGold"
+            size="icon"
+            className="h-9 w-9 rounded-full"
+            onClick={() => goTo(page + 1)}
+            disabled={!total || page >= total}
+            aria-label="Next page"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          <Button
+            variant="outlineGold"
+            size="icon"
+            className="h-9 w-9 rounded-full"
+            onClick={() => setZoom((z) => clamp(z - 0.25, MIN_ZOOM, MAX_ZOOM))}
+            aria-label="Zoom out"
+          >
+            <ZoomOut className="h-4 w-4" />
+          </Button>
+          <span className="w-10 text-center text-xs tabular-nums text-muted-foreground">
+            {Math.round(zoom * 100)}%
+          </span>
+          <Button
+            variant="outlineGold"
+            size="icon"
+            className="h-9 w-9 rounded-full"
+            onClick={() => setZoom((z) => clamp(z + 0.25, MIN_ZOOM, MAX_ZOOM))}
+            aria-label="Zoom in"
+          >
+            <ZoomIn className="h-4 w-4" />
+          </Button>
         </div>
 
         <form
