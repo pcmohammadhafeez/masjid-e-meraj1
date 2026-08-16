@@ -262,7 +262,7 @@ function RootComponent() {
 
             <InstallPrompt />
 
-            <PrayerNotificationScheduler />`r`n <UserAlarm />
+            <PrayerNotificationScheduler />
 
             <OfflineNotice />
           </ContentProvider>
