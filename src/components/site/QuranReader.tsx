@@ -434,27 +434,9 @@ export function QuranReader() {
         </div>
 
         <div className="flex items-center gap-1.5">
-          <Button
-            variant="outlineGold"
-            size="icon"
-            className="h-9 w-9 rounded-full"
-            onClick={() => setZoom((z) => clamp(z - 0.25, MIN_ZOOM, MAX_ZOOM))}
-            aria-label="Zoom out"
-          >
-            <ZoomOut className="h-4 w-4" />
-          </Button>
           <span className="w-10 text-center text-xs tabular-nums text-muted-foreground">
             {Math.round(zoom * 100)}%
           </span>
-          <Button
-            variant="outlineGold"
-            size="icon"
-            className="h-9 w-9 rounded-full"
-            onClick={() => setZoom((z) => clamp(z + 0.25, MIN_ZOOM, MAX_ZOOM))}
-            aria-label="Zoom in"
-          >
-            <ZoomIn className="h-4 w-4" />
-          </Button>
         </div>
 
         <form
