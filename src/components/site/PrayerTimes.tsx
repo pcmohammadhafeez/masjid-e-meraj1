@@ -490,7 +490,7 @@ if (now) {
                   <li
                     key={prayer.key}
                     className={`
-                      group/row relative flex min-h-[4.15rem] items-center gap-2 px-4 pr-[7.5rem]
+                      group/row relative grid min-h-[3.7rem] grid-cols-[2.25rem_minmax(0,1fr)_3.75rem_5.5rem] items-center gap-2 px-3 sm:min-h-[3.9rem] sm:grid-cols-[2.25rem_minmax(0,1fr)_3.75rem_6.5rem] sm:px-5
                       transition-all duration-500 ease-out
                       hover:bg-secondary/60
                       sm:px-5
@@ -580,14 +580,8 @@ if (now) {
                       {prayer.arabic}
                     </span>
 
-                    {/* Connecting line */}
-                    <span
-                      className="mx-2 hidden h-px flex-1 bg-gold/20 transition-all duration-500 group-hover/row:bg-gold/35 sm:block"
-                      aria-hidden="true"
-                    />
-
                     {/* Time */}
-                    <span className="w-[6.5rem] text-end">
+                    <span className="w-full min-w-0 text-end">
                       <span
                         className={`
                           font-clock block
@@ -629,9 +623,6 @@ if (now) {
                         </span>
                       )}
                     </span>
-
-<div className="ms-2 flex shrink-0 items-center">
-</div>
                   </li>
                 );
               })}
