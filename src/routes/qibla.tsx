@@ -1,18 +1,22 @@
-﻿import { useEffect, useState } from "react";
+﻿import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 const KAABA_LAT = 21.422487;
 const KAABA_LON = 39.826206;
-function degToRad(d: number) {
-  return (d * Math.PI) / 180;
+function degToRad(value: number) {
+  return (value * Math.PI) / 180;
 }
 function calculateQibla(lat: number, lon: number) {
   const phi1 = degToRad(lat);
   const phi2 = degToRad(KAABA_LAT);
-  const dlambda = degToRad(KAABA_LON - lon);
-  const y = Math.sin(dlambda);
+  const deltaLambda = degToRad(KAABA_LON - lon);
+  const y = Math.sin(deltaLambda);
   const x =
     Math.cos(phi1) * Math.tan(phi2) -
-    Math.sin(phi1) * Math.cos(dlambda);
-  return (Math.atan2(y, x) * 180) / Math.PI + 360 % 360;
+    Math.sin(phi1) * Math.cos(deltaLambda);
+  return (
+    ((Math.atan2(y, x) * 180) / Math.PI + 360) %
+    360
+  );
 }
 function calculateDistance(
   lat1: number,
@@ -21,32 +25,52 @@ function calculateDistance(
   lon2: number,
 ) {
   const R = 6371;
-  const p1 = degToRad(lat1);
-  const p2 = degToRad(lat2);
-  const dp = degToRad(lat2 - lat1);
-  const dl = degToRad(lon2 - lon1);
+  const phi1 = degToRad(lat1);
+  const phi2 = degToRad(lat2);
+  const deltaPhi = degToRad(lat2 - lat1);
+  const deltaLambda = degToRad(lon2 - lon1);
   const a =
-    Math.sin(dp / 2) ** 2 +
-    Math.cos(p1) *
-      Math.cos(p2) *
-      Math.sin(dl / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    Math.sin(deltaPhi / 2) ** 2 +
+    Math.cos(phi1) *
+      Math.cos(phi2) *
+      Math.sin(deltaLambda / 2) ** 2;
+  return (
+    R *
+    2 *
+    Math.atan2(
+      Math.sqrt(a),
+      Math.sqrt(1 - a),
+    )
+  );
 }
-export default function Qibla() {
+function QiblaPage() {
   const [bearing, setBearing] = useState<number | null>(null);
   const [heading, setHeading] = useState<number | null>(null);
   const [distance, setDistance] = useState<number | null>(null);
-  const [status, setStatus] = useState("Tap Enable Qibla Compass.");
+  const [status, setStatus] = useState(
+    "Tap Enable Qibla Compass.",
+  );
   useEffect(() => {
-    const handleOrientation = (event: DeviceOrientationEvent) => {
-      const safariHeading =
-        (event as DeviceOrientationEvent & {
+    const handleOrientation = (
+      event: DeviceOrientationEvent,
+    ) => {
+      const safariHeading = (
+        event as DeviceOrientationEvent & {
           webkitCompassHeading?: number;
-        }).webkitCompassHeading;
-      if (typeof safariHeading === "number") {
+        }
+      ).webkitCompassHeading;
+      if (
+        typeof safariHeading === "number"
+      ) {
         setHeading(safariHeading);
-      } else if (typeof event.alpha === "number") {
-        setHeading((360 - event.alpha + 360) % 360);
+        return;
+      }
+      if (
+        typeof event.alpha === "number"
+      ) {
+        setHeading(
+          (360 - event.alpha + 360) % 360,
+        );
       }
     };
     window.addEventListener(
@@ -72,15 +96,17 @@ export default function Qibla() {
       );
     };
   }, []);
-  const enableCompass = async () => {
+  async function enableCompass() {
     try {
       if (
-        typeof DeviceOrientationEvent !== "undefined" &&
+        typeof DeviceOrientationEvent !==
+          "undefined" &&
         typeof (
           DeviceOrientationEvent as typeof DeviceOrientationEvent & {
             requestPermission?: () => Promise<string>;
           }
-        ).requestPermission === "function"
+        ).requestPermission ===
+          "function"
       ) {
         const permission =
           await (
@@ -89,26 +115,37 @@ export default function Qibla() {
             }
           ).requestPermission();
         if (permission !== "granted") {
-          throw new Error("Motion permission was denied.");
+          throw new Error(
+            "Motion permission was denied.",
+          );
         }
       }
+      if (!navigator.geolocation) {
+        throw new Error(
+          "Location is not supported by this device.",
+        );
+      }
       setStatus("Getting your location...");
-      const position = await new Promise<GeolocationPosition>(
-        (resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(
-            resolve,
-            reject,
-            {
-              enableHighAccuracy: true,
-              timeout: 15000,
-              maximumAge: 60000,
-            },
-          );
-        },
-      );
-      const lat = position.coords.latitude;
-      const lon = position.coords.longitude;
-      const qibla = ((calculateQibla(lat, lon) % 360) + 360) % 360;
+      const position =
+        await new Promise<GeolocationPosition>(
+          (resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(
+              resolve,
+              reject,
+              {
+                enableHighAccuracy: true,
+                timeout: 15000,
+                maximumAge: 60000,
+              },
+            );
+          },
+        );
+      const lat =
+        position.coords.latitude;
+      const lon =
+        position.coords.longitude;
+      const qibla =
+        calculateQibla(lat, lon);
       setBearing(qibla);
       setDistance(
         calculateDistance(
@@ -119,7 +156,7 @@ export default function Qibla() {
         ),
       );
       setStatus(
-        "Compass active. Hold your phone flat and rotate until the arrow points forward.",
+        "Compass active. Hold your phone flat and rotate until the arrow points to Qibla.",
       );
     } catch (error) {
       setStatus(
@@ -128,33 +165,40 @@ export default function Qibla() {
           : "Unable to start Qibla compass.",
       );
     }
-  };
-  const relativeRotation =
-    bearing !== null && heading !== null
+  }
+  const rotation =
+    bearing !== null &&
+    heading !== null
       ? (bearing - heading + 360) % 360
       : 0;
   return (
     <main
       style={{
         minHeight: "100vh",
-        padding: 24,
+        padding: "24px",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
         background:
           "linear-gradient(160deg,#071a12,#0d2d20)",
         color: "#fff",
-        fontFamily: "Arial,sans-serif",
+        fontFamily:
+          "Arial,sans-serif",
       }}
     >
       <section
         style={{
           width: "100%",
-          maxWidth: 460,
+          maxWidth: "460px",
           textAlign: "center",
         }}
       >
-        <h1 style={{ fontSize: 30, marginBottom: 8 }}>
+        <h1
+          style={{
+            fontSize: "30px",
+            marginBottom: "8px",
+          }}
+        >
           Qibla Finder
         </h1>
         <p style={{ opacity: 0.75 }}>
@@ -166,7 +210,8 @@ export default function Qibla() {
             height: "min(82vw,330px)",
             margin: "28px auto",
             borderRadius: "50%",
-            border: "3px solid rgba(255,255,255,.3)",
+            border:
+              "3px solid rgba(255,255,255,.3)",
             background:
               "radial-gradient(circle,#163f2d,#092218)",
             position: "relative",
@@ -175,17 +220,19 @@ export default function Qibla() {
           <div
             style={{
               position: "absolute",
-              inset: 12,
-              border: "1px solid rgba(255,255,255,.2)",
+              inset: "12px",
+              border:
+                "1px solid rgba(255,255,255,.2)",
               borderRadius: "50%",
             }}
           />
           <div
             style={{
               position: "absolute",
-              top: 18,
+              top: "18px",
               left: "50%",
-              transform: "translateX(-50%)",
+              transform:
+                "translateX(-50%)",
               fontWeight: 700,
             }}
           >
@@ -194,9 +241,10 @@ export default function Qibla() {
           <div
             style={{
               position: "absolute",
-              bottom: 18,
+              bottom: "18px",
               left: "50%",
-              transform: "translateX(-50%)",
+              transform:
+                "translateX(-50%)",
               opacity: 0.6,
             }}
           >
@@ -205,9 +253,10 @@ export default function Qibla() {
           <div
             style={{
               position: "absolute",
-              right: 20,
+              right: "20px",
               top: "50%",
-              transform: "translateY(-50%)",
+              transform:
+                "translateY(-50%)",
               opacity: 0.6,
             }}
           >
@@ -216,9 +265,10 @@ export default function Qibla() {
           <div
             style={{
               position: "absolute",
-              left: 20,
+              left: "20px",
               top: "50%",
-              transform: "translateY(-50%)",
+              transform:
+                "translateY(-50%)",
               opacity: 0.6,
             }}
           >
@@ -229,11 +279,12 @@ export default function Qibla() {
               position: "absolute",
               left: "50%",
               top: "50%",
-              width: 8,
-              height: 125,
-              transformOrigin: "50% 100%",
+              width: "8px",
+              height: "125px",
+              transformOrigin:
+                "50% 100%",
               transform:
-                `translate(-50%,-100%) rotate(${relativeRotation}deg)`,
+                `translate(-50%,-100%) rotate(${rotation}deg)`,
             }}
           >
             <div
@@ -241,10 +292,14 @@ export default function Qibla() {
                 position: "absolute",
                 top: 0,
                 left: "50%",
-                transform: "translateX(-50%)",
-                borderLeft: "18px solid transparent",
-                borderRight: "18px solid transparent",
-                borderBottom: "38px solid white",
+                transform:
+                  "translateX(-50%)",
+                borderLeft:
+                  "18px solid transparent",
+                borderRight:
+                  "18px solid transparent",
+                borderBottom:
+                  "38px solid white",
               }}
             />
             <div
@@ -252,11 +307,12 @@ export default function Qibla() {
                 position: "absolute",
                 bottom: 0,
                 left: "50%",
-                transform: "translateX(-50%)",
-                width: 8,
-                height: 105,
+                transform:
+                  "translateX(-50%)",
+                width: "8px",
+                height: "105px",
                 background: "white",
-                borderRadius: 8,
+                borderRadius: "8px",
               }}
             />
           </div>
@@ -265,16 +321,18 @@ export default function Qibla() {
               position: "absolute",
               left: "50%",
               top: "50%",
-              transform: "translate(-50%,-50%)",
-              width: 58,
-              height: 58,
+              transform:
+                "translate(-50%,-50%)",
+              width: "58px",
+              height: "58px",
               borderRadius: "50%",
               background: "#111",
-              border: "3px solid #d6b85a",
+              border:
+                "3px solid #d6b85a",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: 27,
+              fontSize: "27px",
             }}
           >
             🕋
@@ -282,13 +340,20 @@ export default function Qibla() {
         </div>
         <div
           style={{
-            padding: 20,
-            borderRadius: 18,
-            background: "rgba(255,255,255,.08)",
-            border: "1px solid rgba(255,255,255,.12)",
+            padding: "20px",
+            borderRadius: "18px",
+            background:
+              "rgba(255,255,255,.08)",
+            border:
+              "1px solid rgba(255,255,255,.12)",
           }}
         >
-          <div style={{ fontSize: 32, fontWeight: 700 }}>
+          <div
+            style={{
+              fontSize: "32px",
+              fontWeight: 700,
+            }}
+          >
             {bearing === null
               ? "--°"
               : `${Math.round(bearing)}°`}
@@ -299,7 +364,7 @@ export default function Qibla() {
           <div
             style={{
               opacity: 0.7,
-              marginTop: 6,
+              marginTop: "6px",
             }}
           >
             {distance === null
@@ -308,13 +373,15 @@ export default function Qibla() {
           </div>
         </div>
         <button
+          type="button"
           onClick={enableCompass}
           style={{
-            marginTop: 18,
+            marginTop: "18px",
             border: 0,
-            borderRadius: 12,
-            padding: "14px 22px",
-            fontSize: 16,
+            borderRadius: "12px",
+            padding:
+              "14px 22px",
+            fontSize: "16px",
             fontWeight: 700,
             cursor: "pointer",
             background: "#d6b85a",
@@ -325,9 +392,9 @@ export default function Qibla() {
         </button>
         <p
           style={{
-            marginTop: 16,
+            marginTop: "16px",
             opacity: 0.8,
-            fontSize: 14,
+            fontSize: "14px",
           }}
         >
           {status}
@@ -336,3 +403,7 @@ export default function Qibla() {
     </main>
   );
 }
+export const Route =
+  createFileRoute("/qibla")({
+    component: QiblaPage,
+  });
