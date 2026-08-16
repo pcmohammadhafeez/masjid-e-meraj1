@@ -667,7 +667,13 @@ if (now) {
               ].map(({ Icon, label, value }) => (
                 <div
                   key={label}
-                  className="group/meta flex min-w-0 items-center gap-2.5"
+                  className={`group/meta prayer-meta-card flex min-w-0 items-center gap-2.5 ${
+                    Icon === CalendarDays
+                      ? "prayer-meta-today"
+                      : Icon === Moon
+                        ? "prayer-meta-hijri"
+                        : "prayer-meta-clock"
+                  }`}
                 >
                   <span
                     className="icon-chip grid h-8 w-8 shrink-0 place-items-center rounded-xl text-gold transition-all duration-500 group-hover/meta:scale-105 group-hover/meta:shadow-[0_0_16px_color-mix(in_oklab,var(--color-gold)_18%,transparent)]"

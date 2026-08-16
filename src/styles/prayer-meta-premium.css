@@ -1,0 +1,13 @@
+/* Premium Today / Hijri / Live Clock — UI only */
+.prayer-meta-card{position:relative;isolation:isolate;min-height:78px;border:1px solid color-mix(in oklab,var(--color-border) 70%,transparent);border-radius:18px;padding:11px 13px;overflow:hidden;background:linear-gradient(135deg,color-mix(in oklab,var(--color-card) 96%,transparent),color-mix(in oklab,var(--color-secondary) 75%,transparent));box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 8px 24px rgba(0,0,0,.1);transition:transform .45s ease,border-color .45s ease,box-shadow .45s ease}
+.prayer-meta-card:hover{transform:translateY(-2px);border-color:color-mix(in oklab,var(--meta-accent) 45%,var(--color-border));box-shadow:0 14px 34px color-mix(in oklab,var(--meta-accent) 12%,transparent)}
+.prayer-meta-card .icon-chip{width:39px;height:39px;border:1px solid color-mix(in oklab,var(--meta-accent) 30%,transparent);border-radius:50%;color:var(--meta-accent);background:color-mix(in oklab,var(--meta-accent) 7%,var(--color-card));box-shadow:0 0 0 5px color-mix(in oklab,var(--meta-accent) 4%,transparent),0 0 20px color-mix(in oklab,var(--meta-accent) 10%,transparent);transition:transform .4s ease,box-shadow .4s ease}
+.prayer-meta-card:hover .icon-chip{transform:scale(1.07);box-shadow:0 0 0 6px color-mix(in oklab,var(--meta-accent) 7%,transparent),0 0 25px color-mix(in oklab,var(--meta-accent) 18%,transparent)}
+.prayer-meta-card p:first-child{color:color-mix(in oklab,var(--meta-accent) 58%,var(--color-muted-foreground))}
+.prayer-meta-card p:last-child{font-weight:650;transition:color .4s ease,transform .4s ease;text-shadow:0 0 0 transparent}
+.prayer-meta-card:hover p:last-child{color:color-mix(in oklab,var(--meta-accent) 82%,var(--color-foreground));transform:translateX(2px);text-shadow:0 0 16px color-mix(in oklab,var(--meta-accent) 16%,transparent)}
+.prayer-meta-today{--meta-accent:#69dcae}.prayer-meta-hijri{--meta-accent:#d7b56a}.prayer-meta-clock{--meta-accent:#67e4d1}.prayer-meta-clock p:last-child{font-variant-numeric:tabular-nums;letter-spacing:.025em}
+@keyframes prayer-clock-live{0%,100%{box-shadow:0 0 0 5px color-mix(in oklab,var(--meta-accent) 4%,transparent),0 0 18px color-mix(in oklab,var(--meta-accent) 8%,transparent)}50%{box-shadow:0 0 0 7px color-mix(in oklab,var(--meta-accent) 7%,transparent),0 0 28px color-mix(in oklab,var(--meta-accent) 18%,transparent)}}
+.prayer-meta-clock .icon-chip{animation:prayer-clock-live 2.8s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){.prayer-meta-card,.prayer-meta-card *{animation:none!important;transition:none!important}.prayer-meta-card:hover{transform:none}}
+@media(max-width:640px){.prayer-meta-card{min-height:72px;border-radius:16px;padding:10px 12px}.prayer-meta-card .icon-chip{width:38px;height:38px}}
