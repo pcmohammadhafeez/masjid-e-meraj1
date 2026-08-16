@@ -42,7 +42,7 @@ export function QuranReader() {
   const total = cfg?.pageCount ?? 0;
 
   const [page, setPage] = useState(1);
-  const [mode, setMode] = useState<"swipe" | "scroll">("scroll");
+  const mode = "scroll" as const;
   const [zoom, setZoom] = useState(1);
   const [night, setNight] = useState(false);
   const [urls, setUrls] = useState<Record<number, string>>({});
@@ -261,7 +261,7 @@ export function QuranReader() {
       )}
     >
       {/* ---------- top bar ---------- */}
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className="quran-reader-toolbar flex flex-wrap items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
           <span className="icon-chip grid h-9 w-9 shrink-0 place-items-center rounded-xl text-gold" aria-hidden="true">
             <BookOpen className="h-4 w-4" />
@@ -294,15 +294,6 @@ export function QuranReader() {
             aria-label={night ? "Light pages" : "Dark pages"}
           >
             {night ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </Button>
-          <Button
-            variant="outlineGold"
-            size="icon"
-            className="h-9 w-9 rounded-full"
-            onClick={() => setMode((m) => (m === "swipe" ? "scroll" : "swipe"))}
-            aria-label={mode === "swipe" ? "Switch to vertical scrolling" : "Switch to swipe pages"}
-          >
-            {mode === "swipe" ? <MoveVertical className="h-4 w-4" /> : <ArrowLeftRight className="h-4 w-4" />}
           </Button>
           <Button
             variant="outlineGold"
@@ -359,7 +350,7 @@ export function QuranReader() {
           mode === "swipe"
             ? "flex overflow-x-auto overflow-y-auto"
             : "block overflow-y-auto overflow-x-auto",
-          mode === "swipe" && zoom <= 1.02 && "snap-x snap-mandatory",
+          zoom <= 1.02 && "snap-y snap-mandatory",
         )}
         style={{ height: viewportHeight, touchAction: zoom > 1.02 ? "pan-x pan-y" : undefined }}
       >
@@ -392,7 +383,7 @@ export function QuranReader() {
                     loading={p === page ? "eager" : "lazy"}
                     draggable={false}
                     className={cn(
-                      "h-full w-full select-none object-contain",
+                      "quran-page-image h-full w-full select-none object-contain",
                       night && "invert-[0.92] hue-rotate-180 brightness-[0.95]",
                     )}
                   />
@@ -414,7 +405,7 @@ export function QuranReader() {
       </div>
 
       {/* ---------- bottom bar ---------- */}
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+      <div className="quran-reader-controls mt-3 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
           <Button
             variant="outlineGold"
