@@ -696,12 +696,12 @@ if (now) {
             </div>
 
             {offline && lastUpdated ? (
-              <div className="flex items-center justify-center gap-1.5 border-t border-gold/15 bg-secondary/40 px-5 py-2 sm:px-8">
+              <div className="flex items-center justify-center gap-1.5 border-t border-gold/20 bg-secondary/50 px-5 py-2 sm:px-8">
                 <RefreshCw
-                  className="h-3 w-3 text-gold/70"
+                  className="h-3 w-3 text-gold"
                   aria-hidden="true"
                 />
-                <span className="text-[0.68rem] font-medium tracking-wide text-muted-foreground">
+                <span className="text-[0.7rem] font-semibold tracking-wide text-foreground/75">
                   {t("prayer.lastUpdated")}:{" "}
                   {formatTimestamp(lastUpdated, locale)}
                 </span>
