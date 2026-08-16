@@ -42,7 +42,7 @@ export function QuranReader() {
   const total = cfg?.pageCount ?? 0;
 
   const [page, setPage] = useState(1);
-  const mode = "scroll" as const;
+  const mode = "swipe" as const;
   const [zoom, setZoom] = useState(1);
   const [night, setNight] = useState(false);
   const [urls, setUrls] = useState<Record<number, string>>({});
