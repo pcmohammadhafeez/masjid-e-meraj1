@@ -126,7 +126,7 @@ function Field({
 
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="surface-card rounded-[2rem] p-7">
+    <section className="surface-card admin-panel rounded-[2rem] p-6 sm:p-8">
       <h2 className="text-lg font-semibold text-foreground">{title}</h2>
       <div className="gold-rule mt-4" aria-hidden="true" />
       <div className="mt-6 space-y-6">{children}</div>
@@ -298,12 +298,12 @@ function Admin() {
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="admin-shell min-h-screen bg-background">
         <Navbar transparent={false} />
         <main className="grid place-items-center px-5 py-32 sm:px-8">
           <form
             onSubmit={(e) => void onSubmitLogin(e)}
-            className="glass-card w-full max-w-md rounded-[2rem] p-8"
+            className="glass-card admin-login-card w-full max-w-md rounded-[2rem] p-8"
             aria-labelledby="admin-login-title"
           >
             <span
@@ -363,9 +363,9 @@ function Admin() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="admin-shell min-h-screen bg-background">
       <Navbar transparent={false} />
-      <main className="mx-auto max-w-6xl px-5 pb-20 pt-28 sm:px-8">
+      <main className="admin-main mx-auto max-w-6xl px-5 pb-20 pt-28 sm:px-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gold-foreground">
@@ -375,7 +375,7 @@ function Admin() {
               {t("admin.title")}
             </h1>
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="admin-actions flex flex-wrap gap-3">
             <Button
               variant="gold"
               className="rounded-full"
@@ -437,8 +437,8 @@ function Admin() {
           </div>
         </div>
 
-        <Tabs defaultValue="times" className="mt-10">
-          <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 rounded-full p-1.5">
+        <Tabs defaultValue="times" className="admin-tabs mt-8 sm:mt-10">
+          <TabsList className="admin-tab-list flex h-auto w-full gap-1 rounded-2xl p-1.5">
             <TabsTrigger value="times" className="rounded-full">
               {t("prayer.title")}
             </TabsTrigger>
@@ -727,7 +727,7 @@ function Admin() {
                       className="h-20 w-20 rounded-2xl object-cover"
                     />
                   )}
-                  <div className="flex flex-wrap gap-3">
+                  <div className="admin-actions flex flex-wrap gap-3">
                     <Button variant="outlineGold" size="sm" className="rounded-full" asChild>
                       <label className="cursor-pointer">
                         <Upload /> Upload
@@ -767,7 +767,7 @@ function Admin() {
                       className="h-28 w-full rounded-2xl object-cover"
                     />
                   )}
-                  <div className="flex flex-wrap gap-3">
+                  <div className="admin-actions flex flex-wrap gap-3">
                     <Button variant="outlineGold" size="sm" className="rounded-full" asChild>
                       <label className="cursor-pointer">
                         <Upload /> Upload
