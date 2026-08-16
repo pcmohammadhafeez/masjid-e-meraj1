@@ -631,11 +631,6 @@ if (now) {
                     </span>
 
 <div className="ms-2 flex shrink-0 items-center">
-  <PrayerNotificationSettings
-  prayerKey={prayer.key}
-  prayerLabel={t(`prayer.${prayer.key}`)}
-  prayerTime={content.prayerTimes[prayer.key]}
-/>
 </div>
                   </li>
                 );
