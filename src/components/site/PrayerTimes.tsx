@@ -490,7 +490,7 @@ if (now) {
                   <li
                     key={prayer.key}
                     className={`
-                      group/row relative flex min-h-[4.15rem] items-center gap-2 px-4
+                      group/row relative flex min-h-[4.15rem] items-center gap-2 px-4 pr-[7.5rem]
                       transition-all duration-500 ease-out
                       hover:bg-secondary/60
                       sm:px-5
@@ -568,7 +568,7 @@ if (now) {
                     {/* Arabic */}
                     <span
                       className={`
-                        w-[3.5rem] shrink-0 text-center font-arabic transition-colors duration-300
+                        w-[3.75rem] shrink-0 text-center font-arabic transition-colors duration-300
                         ${
                           prayer.secondary
                             ? "text-xs text-muted-foreground"
