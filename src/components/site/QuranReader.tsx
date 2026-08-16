@@ -14,11 +14,13 @@ import {
   ZoomIn,
   ZoomOut,
   ArrowLeftRight,
+  Download,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import JSZip from "jszip";
 import { fetchQuranPagesConfig, signPages } from "@/lib/quran-pages";
 
 /** Aspect ratio of the scanned pages — keeps skeletons the exact page size. */
@@ -50,6 +52,8 @@ export function QuranReader() {
   const [resume, setResume] = useState<number | null>(null);
   const [fullscreen, setFullscreen] = useState(false);
   const [jump, setJump] = useState("");
+  const [downloadBusy, setDownloadBusy] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
 
   const wrapRef = useRef<HTMLDivElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -58,7 +62,79 @@ export function QuranReader() {
   const pageRef = useRef(1);
   pageRef.current = page;
 
-  /* ---------- saved reading position + bookmarks ---------- */
+  /* ---------- full Quran download ---------- */
+  const downloadFullQuran = useCallback(async () => {
+    if (!cfg?.pageCount || downloadBusy) return;
+    setDownloadBusy(true);
+    setDownloadProgress(0);
+    try {
+      const zip = new JSZip();
+      const chunkSize = 20;
+      for (
+        let start = 1;
+        start <= cfg.pageCount;
+        start += chunkSize
+      ) {
+        const end = Math.min(
+          cfg.pageCount,
+          start + chunkSize - 1,
+        );
+        const pages = Array.from(
+          { length: end - start + 1 },
+          (_, index) => start + index,
+        );
+        const signed = await signPages(cfg, pages);
+        for (const pageNumber of pages) {
+          const url = signed[pageNumber];
+          if (!url) {
+            throw new Error(
+              `Could not prepare Quran page ${pageNumber}.`,
+            );
+          }
+          const response = await fetch(url);
+          if (!response.ok) {
+            throw new Error(
+              `Could not download Quran page ${pageNumber}.`,
+            );
+          }
+          const blob = await response.blob();
+          zip.file(
+            `${String(pageNumber).padStart(4, "0")}.${cfg.ext}`,
+            blob,
+          );
+          setDownloadProgress(
+            Math.round(
+              (pageNumber / cfg.pageCount) * 100,
+            ),
+          );
+        }
+      }
+      const archive = await zip.generateAsync({
+        type: "blob",
+        compression: "STORE",
+      });
+      const url = URL.createObjectURL(archive);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "Masjid-e-Meraj-Quran.zip";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(
+        () => URL.revokeObjectURL(url),
+        3000,
+      );
+    } catch (error) {
+      console.error("[quran] full download failed", error);
+      window.alert(
+        error instanceof Error
+          ? error.message
+          : "Unable to download the Quran.",
+      );
+    } finally {
+      setDownloadBusy(false);
+    }
+  }, [cfg, downloadBusy]);  /* ---------- saved reading position + bookmarks ---------- */
   useEffect(() => {
     try {
       const last = Number(localStorage.getItem(LAST_PAGE_KEY) || "");
@@ -250,7 +326,7 @@ export function QuranReader() {
   }, [mode]);
 
   const bookmarked = bookmarks.includes(page);
-  const viewportHeight = fullscreen ? "calc(100vh - 132px)" : "min(76vh, 720px)";
+  const viewportHeight = fullscreen ? "calc(100dvh - 180px)" : undefined;
 
   return (
     <div

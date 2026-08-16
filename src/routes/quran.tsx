@@ -31,8 +31,8 @@ function QuranPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar transparent={false} />
-      <main className="gradient-sand pb-10 pt-20 sm:pt-24">
-        <div className="mx-auto max-w-3xl px-3 sm:px-8">
+      <main className="quran-route-main gradient-sand pb-4 pt-16 sm:pt-20">
+        <div className="quran-route-shell mx-auto max-w-3xl px-2 sm:px-6">
           <div className="mb-4">
             <Button variant="outlineGold" size="sm" className="rounded-full" asChild>
               <Link to="/">

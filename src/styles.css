@@ -1171,3 +1171,230 @@
   }
 }
 /* MASJID-E-MERAJ-QURAN-VERTICAL-UI END */
+
+/* MASJID-E-MERAJ-QURAN-IMMERSIVE-V2 */
+/* ------------------------------------------------------------
+   Reader container
+   ------------------------------------------------------------ */
+.quran-route-main {
+  min-height:
+    100dvh;
+}
+.quran-route-shell {
+  min-height:
+    calc(100dvh - 4rem);
+}
+/* ------------------------------------------------------------
+   Toolbar
+   ------------------------------------------------------------ */
+.quran-reader-toolbar {
+  position:
+    sticky;
+  top:
+    0;
+  z-index:
+    30;
+  padding:
+    .4rem 0 .7rem;
+  background:
+    color-mix(
+      in oklab,
+      var(--color-background) 94%,
+      transparent
+    );
+  backdrop-filter:
+    blur(16px);
+  -webkit-backdrop-filter:
+    blur(16px);
+}
+/* ------------------------------------------------------------
+   Page viewer
+   ------------------------------------------------------------ */
+.quran-reader-scroller {
+  overflow-x:
+    auto;
+  overflow-y:
+    hidden;
+  height:
+    auto !important;
+  min-height:
+    0;
+  scroll-snap-type:
+    x mandatory;
+  overscroll-behavior-x:
+    contain;
+  overscroll-behavior-y:
+    none;
+  touch-action:
+    pan-x;
+  scrollbar-width:
+    none;
+}
+.quran-reader-scroller::-webkit-scrollbar {
+  display:
+    none;
+}
+.quran-page-slot {
+  flex:
+    0 0 100%;
+  width:
+    100%;
+  min-width:
+    100%;
+  height:
+    auto;
+  padding:
+    0 0 .35rem;
+  display:
+    flex;
+  justify-content:
+    center;
+  align-items:
+    flex-start;
+  scroll-snap-align:
+    center;
+}
+.quran-page-slot > div {
+  width:
+    100% !important;
+  height:
+    auto !important;
+  aspect-ratio:
+    900 / 1400;
+}
+.quran-page-image {
+  width:
+    100% !important;
+  height:
+    auto !important;
+  max-height:
+    none !important;
+  object-fit:
+    contain;
+}
+/* ------------------------------------------------------------
+   Keep bottom controls visible
+   ------------------------------------------------------------ */
+.quran-reader-controls {
+  position:
+    sticky;
+  bottom:
+    0;
+  z-index:
+    30;
+  padding:
+    .65rem 0 .35rem;
+  background:
+    color-mix(
+      in oklab,
+      var(--color-card) 94%,
+      transparent
+    );
+  backdrop-filter:
+    blur(14px);
+  -webkit-backdrop-filter:
+    blur(14px);
+}
+/* ------------------------------------------------------------
+   Download progress
+   ------------------------------------------------------------ */
+.download-progress-strip {
+  margin-top:
+    .5rem;
+  padding:
+    .55rem .8rem;
+  border:
+    1px solid var(--color-border);
+  border-radius:
+    14px;
+  background:
+    var(--color-secondary);
+  color:
+    var(--color-foreground);
+  font-size:
+    .72rem;
+}
+.download-progress-track {
+  height:
+    4px;
+  margin-top:
+    .45rem;
+  overflow:
+    hidden;
+  border-radius:
+    999px;
+  background:
+    color-mix(
+      in oklab,
+      var(--color-border) 75%,
+      transparent
+    );
+}
+.download-progress-value {
+  height:
+    100%;
+  border-radius:
+    inherit;
+  background:
+    var(--color-primary);
+  transition:
+    width .15s linear;
+}
+/* ------------------------------------------------------------
+   Fullscreen reader
+   ------------------------------------------------------------ */
+.quran-reader-shell:fullscreen {
+  padding:
+    max(.75rem, env(safe-area-inset-top))
+    max(.75rem, env(safe-area-inset-right))
+    max(.75rem, env(safe-area-inset-bottom))
+    max(.75rem, env(safe-area-inset-left));
+  background:
+    var(--color-background);
+}
+.quran-reader-shell:fullscreen .quran-reader-scroller {
+  flex:
+    1 1 auto;
+}
+/* ------------------------------------------------------------
+   Mobile
+   ------------------------------------------------------------ */
+@media (max-width: 640px) {
+  .quran-route-shell {
+    padding-left:
+      8px;
+    padding-right:
+      8px;
+  }
+  .quran-reader-shell {
+    padding:
+      8px !important;
+    border-radius:
+      18px !important;
+  }
+  .quran-reader-toolbar {
+    padding:
+      .25rem 0 .5rem;
+  }
+  .quran-reader-controls {
+    padding-bottom:
+      max(
+        .35rem,
+        env(safe-area-inset-bottom)
+      );
+  }
+}
+/* ------------------------------------------------------------
+   Reduced motion
+   ------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .quran-reader-scroller {
+    scroll-behavior:
+      auto;
+  }
+  .download-progress-value {
+    transition:
+      none;
+  }
+}
+/* MASJID-E-MERAJ-QURAN-IMMERSIVE-V2 END */
