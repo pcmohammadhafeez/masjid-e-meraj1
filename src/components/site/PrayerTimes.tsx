@@ -8,6 +8,7 @@ import {
   Star,
   Clock,
   CalendarDays,
+  RefreshCw,
 } from "lucide-react";
 
 import { Reveal } from "@/components/site/Reveal";
@@ -47,6 +48,27 @@ function useNow() {
   return now;
 }
 
+/** True only while the device has no network connection. */
+function useIsOffline() {
+  const [offline, setOffline] = useState(false);
+
+  useEffect(() => {
+    const sync = () => setOffline(!navigator.onLine);
+
+    sync();
+
+    window.addEventListener("online", sync);
+    window.addEventListener("offline", sync);
+
+    return () => {
+      window.removeEventListener("online", sync);
+      window.removeEventListener("offline", sync);
+    };
+  }, []);
+
+  return offline;
+}
+
 function formatClock(date: Date) {
   const pad = (n: number) => String(n).padStart(2, "0");
   const h = date.getHours();
@@ -55,6 +77,21 @@ function formatClock(date: Date) {
   return `${pad(h12)}:${pad(date.getMinutes())}:${pad(
     date.getSeconds(),
   )} ${h >= 12 ? "PM" : "AM"}`;
+}
+
+/** Formats a content-fetch timestamp for the offline "last updated" strip. */
+function formatTimestamp(ts: number, locale: string) {
+  try {
+    return new Intl.DateTimeFormat(locale, {
+      day: "numeric",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    }).format(new Date(ts));
+  } catch {
+    return new Date(ts).toLocaleString();
+  }
 }
 
 function formatHijri(date: Date, lang: "en" | "te" | "ur") {
@@ -261,9 +298,10 @@ function PrayerLoadingSkeleton() {
 }
 
 export function PrayerTimes() {
-  const { content, loading } = useContent();
+  const { content, loading, lastUpdated } = useContent();
   const { t, lang } = useI18n();
   const now = useNow();
+  const offline = useIsOffline();
 
   /*
    * IMPORTANT:
@@ -656,6 +694,19 @@ if (now) {
                 </div>
               ))}
             </div>
+
+            {offline && lastUpdated ? (
+              <div className="flex items-center justify-center gap-1.5 border-t border-gold/20 bg-secondary/50 px-5 py-2 sm:px-8">
+                <RefreshCw
+                  className="h-3 w-3 text-gold"
+                  aria-hidden="true"
+                />
+                <span className="text-[0.7rem] font-semibold tracking-wide text-foreground/75">
+                  {t("prayer.lastUpdated")}:{" "}
+                  {formatTimestamp(lastUpdated, locale)}
+                </span>
+              </div>
+            ) : null}
           </div>
         </Reveal>
       </div>
