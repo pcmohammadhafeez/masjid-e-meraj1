@@ -244,10 +244,10 @@ function PrayerLoadingSkeleton() {
       aria-busy="true"
       aria-label="Loading prayer times"
     >
-      <div className="mx-auto max-w-3xl px-4 sm:px-6">
+      <div className="mx-auto max-w-3xl px-4 sm:px-5">
         <div className="overflow-hidden rounded-[2rem] surface-card sm:rounded-[2.5rem]">
           {/* Header skeleton */}
-          <div className="flex items-center justify-between border-b border-gold/25 bg-secondary/40 px-5 py-4 sm:px-6">
+          <div className="flex items-center justify-between border-b border-gold/25 bg-secondary/40 px-5 py-4 sm:px-5">
             <div className="flex items-center gap-3">
               <div className="h-9 w-9 animate-pulse rounded-xl bg-gold/10" />
               <div className="h-6 w-32 animate-pulse rounded-full bg-foreground/10" />
@@ -261,7 +261,7 @@ function PrayerLoadingSkeleton() {
             {prayerMeta.map((prayer, index) => (
               <div
                 key={prayer.key}
-                className={`flex items-center gap-3 px-5 sm:px-6 ${
+                className={`flex items-center gap-3 px-5 sm:px-5 ${
                   prayer.secondary ? "py-2" : "py-2.5"
                 }`}
               >
@@ -284,7 +284,7 @@ function PrayerLoadingSkeleton() {
           </div>
 
           {/* Bottom skeleton */}
-          <div className="grid gap-3 border-t border-gold/25 bg-secondary/60 px-3 py-2 sm:grid-cols-3 sm:px-6">
+          <div className="grid gap-3 border-t border-gold/25 bg-secondary/60 px-3 py-2 sm:grid-cols-3 sm:px-5">
             {[1, 2, 3].map((item) => (
               <div
                 key={item}
@@ -445,12 +445,12 @@ if (now) {
       id="prayer-times"
       className="particles scroll-mt-20 gradient-sand pb-6 pt-20 sm:pb-8 sm:pt-24"
     >
-      <div className="mx-auto max-w-3xl px-4 sm:px-6">
+      <div className="mx-auto max-w-3xl px-4 sm:px-5">
         <Reveal>
           <div className="group overflow-hidden rounded-[2rem] surface-card shadow-soft transition-shadow duration-700 hover:shadow-lift sm:rounded-[2.5rem]">
 
             {/* Header */}
-            <div className="relative flex flex-wrap items-center justify-between gap-3 overflow-hidden border-b border-gold/25 bg-secondary/40 px-5 py-4 sm:px-6">
+            <div className="relative flex flex-wrap items-center justify-between gap-3 overflow-hidden border-b border-gold/25 bg-secondary/40 px-5 py-4 sm:px-5">
 
               {/* Soft premium light sweep */}
               <div
@@ -490,10 +490,10 @@ if (now) {
                   <li
                     key={prayer.key}
                     className={`
-                      group/row relative grid grid-cols-[2.5rem_minmax(6.5rem,1fr)_4rem_6.5rem] items-center gap-2 gap-3 px-5
+                      group/row relative flex items-center gap-2 px-4
                       transition-all duration-500 ease-out
                       hover:bg-secondary/60
-                      sm:px-6
+                      sm:px-5
                       ${prayer.secondary ? "py-2" : "py-2.5"}
                       ${isNext ? "next-prayer" : ""}
                     `}
@@ -568,7 +568,7 @@ if (now) {
                     {/* Arabic */}
                     <span
                       className={`
-                        font-arabic transition-colors duration-300
+                        w-[3.25rem] shrink-0 font-arabic transition-colors duration-300
                         ${
                           prayer.secondary
                             ? "text-xs text-muted-foreground"
@@ -638,7 +638,7 @@ if (now) {
             </ul>
 
             {/* Date / Hijri / Live Clock */}
-            <div className="grid gap-3 border-t border-gold/25 bg-secondary/60 px-3 py-2 sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <div className="grid gap-3 border-t border-gold/25 bg-secondary/60 px-3 py-2 sm:grid-cols-3 sm:gap-4 sm:px-5">
               {[
                 {
                   Icon: CalendarDays,
@@ -704,7 +704,7 @@ if (now) {
             </div>
 
             {offline && lastUpdated ? (
-              <div className="flex items-center justify-center gap-1.5 border-t border-gold/20 bg-secondary/50 px-5 py-2 sm:px-6">
+              <div className="flex items-center justify-center gap-1.5 border-t border-gold/20 bg-secondary/50 px-5 py-2 sm:px-5">
                 <RefreshCw
                   className="h-3 w-3 text-gold"
                   aria-hidden="true"
