@@ -1,7 +1,7 @@
 import { useEffect, useState, type ChangeEvent } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Lock, LogOut, Save, RotateCcw, Plus, Trash2, Upload } from "lucide-react";
+import { Lock, LogOut, Save, Plus, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 import { Navbar } from "@/components/site/Navbar";
@@ -417,19 +417,6 @@ function Admin() {
               onClick={() => setDraft(content)}
             >
               {t("admin.cancel")}
-            </Button>
-            <Button
-              variant="outline"
-              className="rounded-full"
-              onClick={() => {
-                void resetContent()
-                  .then(() => toast.success(t("admin.resetDone")))
-                  .catch((err: unknown) =>
-                    toast.error(err instanceof Error ? err.message : "Reset failed"),
-                  );
-              }}
-            >
-              <RotateCcw /> {t("admin.reset")}
             </Button>
             <Button variant="outline" className="rounded-full" onClick={() => void logout()}>
               <LogOut /> {t("admin.signOut")}
