@@ -36,18 +36,25 @@ function useNow() {
   const [now, setNow] = useState<Date | null>(null);
 
   useEffect(() => {
-    setNow(new Date());
+    let timeoutId: number;
 
-    const id = window.setInterval(() => {
+    const tick = () => {
       setNow(new Date());
-    }, 1000);
+      timeoutId = window.setTimeout(
+        tick,
+        1000 - (Date.now() % 1000),
+      );
+    };
 
-    return () => window.clearInterval(id);
+    tick();
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
   }, []);
 
   return now;
 }
-
 /** True only while the device has no network connection. */
 function useIsOffline() {
   const [offline, setOffline] = useState(false);
