@@ -246,9 +246,7 @@ function QiblaPage() {
           QIBLA_BEARING,
         );
   const absoluteDifference =
-    qiblaDifference === null
-      ? null
-      : Math.abs(qiblaDifference);
+    qiblaDifference === null ? 0 : Math.abs(qiblaDifference);
   const directionText =
     qiblaDifference === null
       ? "Waiting for compass"
