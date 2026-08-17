@@ -615,13 +615,6 @@ if (now) {
                         </span>
                       </span>
 
-                      {prayer.key === "jumuah" && (
-                        <span className="block text-[0.68rem] font-medium text-muted-foreground transition-colors duration-300 group-hover/row:text-foreground/75">
-                          Khutbah{" "}
-                          {to12h(content.jumuahKhutbah, "jumuah").time}{" "}
-{to12h(content.jumuahKhutbah, "jumuah").suffix}
-                        </span>
-                      )}
                     </span>
                   </li>
                 );
