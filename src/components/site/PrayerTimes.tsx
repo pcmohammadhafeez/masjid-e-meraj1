@@ -13,7 +13,6 @@ import {
 
 import { Reveal } from "@/components/site/Reveal";
 import { useContent, type PrayerKey } from "@/lib/content";
-import { PrayerNotificationSettings } from "@/components/site/PrayerNotificationSettings";
 import { useI18n } from "@/lib/i18n";
 import { formatHijriDate } from "@/lib/hijri";
 
